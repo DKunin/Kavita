@@ -1,0 +1,18 @@
+services:
+  kavita:
+    image: jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
+    container_name: kavita
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      TZ: Europe/Moscow
+    volumes:
+      - ./config:/kavita/config
+      - /mnt/data/plex/books:/books:ro
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 2g
+    cpus: 2.0
