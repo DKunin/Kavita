@@ -5,11 +5,13 @@ Production работает на `https://books.kunini.ru`. Контейнер �
 `/var/apps/kavita/deployment/kunini/config`, а библиотека монтируется только для
 чтения из `/mnt/data/plex/books`.
 
-Веб-интерфейс закрыт через Kunini Auth. Kavita сохраняет собственных
-пользователей и права: это необходимо для раздельного прогресса чтения,
-библиотек и персональных API-ключей. Парольный вход и первичная регистрация
-дополнительно требуют активную сессию Kunini Auth. Машинный `/api/*` не получает
-HTML-редирект и использует штатный `x-api-key` или bearer token Kavita.
+Веб-интерфейс входит через Kunini Auth по OIDC authorization-code/PKCE и
+автоматически связывает пользователя по стабильному Kunini UUID. Kavita
+сохраняет отдельного пользователя, права и прогресс чтения для каждого Kunini
+аккаунта. Новые аккаунты получают доступ к `Books` и роли Login, Download и
+Bookmark; `dkunin` сохраняет Admin. Парольный вход Kavita отключён. Машинный
+`/api/*` не получает HTML-редирект и использует штатный персональный `x-api-key`
+или bearer token Kavita.
 
 ## Деплой
 
@@ -36,7 +38,7 @@ OPDS включён. Сгенерированный пароль хранитс�
 Kover использует штатный `/api/Plugin/authenticate`; access log для этого
 маршрута отключён, поскольку контракт Kavita передаёт ключ в query string.
 
-Native-аутентификация Kavita не отключена: Kunini Auth не является OIDC
-провайдером, а отключение native auth без OIDC лишит веб и API штатной
-идентификации пользователей. При переходе Kunini Auth на OIDC Kavita умеет
-автопровижининг, синхронизацию ролей и отключение парольного входа без патча.
+OIDC authority — `https://auth.kunini.ru/oidc`, client secret хранится только в
+`/var/apps/kunini-auth/.env`, RSA signing key — в
+`/var/apps/kunini-auth/data/oidc-signing-key.pem`; оба файла имеют режим `0600`.
+API-key вход Kover остаётся независимым от браузерной OIDC-сессии.

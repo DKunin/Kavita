@@ -9,6 +9,9 @@ temporary_dir="$(mktemp -d)"
 trap 'rm -rf "${temporary_dir}"' EXIT
 
 curl --fail --silent http://127.0.0.1:5000/api/health >/dev/null
+curl --fail --silent http://127.0.0.1:5000/api/Settings/oidc >"${temporary_dir}/oidc-config.json"
+docker exec kavita curl --fail --silent \
+    https://auth.kunini.ru/oidc/.well-known/openid-configuration >"${temporary_dir}/oidc-discovery.json"
 
 health="$(docker inspect kavita --format '{{.State.Health.Status}}')"
 published_port="$(docker port kavita 5000/tcp)"
@@ -40,6 +43,13 @@ if [[ ! -s "${password_file}" || ! -s "${api_key_file}" \
     exit 1
 fi
 
+jq -n --arg username dkunin --rawfile password "${password_file}" \
+    '{username: $username, password: ($password | rtrimstr("\n"))}' >"${temporary_dir}/native-login.json"
+native_login_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    --request POST --header 'Content-Type: application/json' \
+    --data-binary "@${temporary_dir}/native-login.json" \
+    http://127.0.0.1:5000/api/Account/login)"
+
 printf 'x-api-key: ' >"${temporary_dir}/api-key-header"
 tr -d '\r\n' <"${api_key_file}" >"${temporary_dir}/api-key-value"
 cat "${temporary_dir}/api-key-value" >>"${temporary_dir}/api-key-header"
@@ -67,5 +77,13 @@ if ! jq -e 'any(.[]; .name == "Books" and (.folders | index("/books")))' \
     echo "Authenticated API, Kover login, or Books library verification failed." >&2
     exit 1
 fi
+if [[ "${native_login_status}" != "401" ]] \
+    || ! jq -e '.enabled == true and .autoLogin == true and .disablePasswordAuthentication == true and .providerName == "Kunini"' \
+    "${temporary_dir}/oidc-config.json" >/dev/null \
+    || ! jq -e '.issuer == "https://auth.kunini.ru/oidc" and (.code_challenge_methods_supported | index("S256"))' \
+    "${temporary_dir}/oidc-discovery.json" >/dev/null; then
+    echo "Kunini OIDC or native-password-disable verification failed." >&2
+    exit 1
+fi
 
-printf 'Verified %s: browser SSO, dkunin API/Kover auth, Books library, TLS, loopback listener, and read-only media mount.\n' "${domain}"
+printf 'Verified %s: Kunini OIDC, disabled native passwords, dkunin API/Kover auth, Books library, TLS, loopback listener, and read-only media mount.\n' "${domain}"
