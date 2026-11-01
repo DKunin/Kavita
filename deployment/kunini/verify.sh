@@ -23,8 +23,8 @@ login_location="$(curl --silent --head --resolve "${domain}:443:127.0.0.1" \
 api_health="$(curl --fail --silent --resolve "${domain}:443:127.0.0.1" \
     "https://${domain}/api/health")"
 api_auth_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
-    --request POST --resolve "${domain}:443:127.0.0.1" \
-    "https://${domain}/api/plugin/authenticate?apiKey=invalid&pluginName=deployment-verification")"
+    --resolve "${domain}:443:127.0.0.1" \
+    "https://${domain}/api/Library/libraries")"
 login_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
     --request POST --header 'Content-Type: application/json' --data '{}' \
     --resolve "${domain}:443:127.0.0.1" "https://${domain}/api/account/login")"
