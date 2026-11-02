@@ -53,6 +53,8 @@ import {RecentlyAddedItem} from "../../_models/recently-added-item";
 import {SeriesSortField} from "../../_models/metadata/series-filter";
 import {Library} from "../../_models/library/library";
 import {PaginatedResult} from "../../_models/pagination";
+import {ImageComponent} from "../../shared/image/image.component";
+import {Series} from "../../_models/series";
 
 enum StreamId {
   OnDeck,
@@ -80,7 +82,7 @@ const dashboardReloadEvents: string[] = [EVENTS.DashboardUpdate, EVENTS.SeriesAd
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, AsyncPipe, TranslocoDirective,
-    NgTemplateOutlet, LoadingComponent, EntityCardComponent, PromotedIconComponent]
+    NgTemplateOutlet, LoadingComponent, EntityCardComponent, PromotedIconComponent, ImageComponent]
 })
 export class DashboardComponent {
 
@@ -109,6 +111,7 @@ export class DashboardComponent {
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = signal<boolean>(true);
+  featuredOnDeck = signal<SeriesCardEntity | null>(null);
 
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
@@ -167,8 +170,8 @@ export class DashboardComponent {
   }
 
   onDeckNextPage(stream: DashboardStream) {
-    return (pageNum: number, pageSize: number) => {
-      return this.seriesService.getOnDeck(pageNum, pageSize)
+    return (pageNum: number, _pageSize: number) => {
+      return this.seriesService.getOnDeck(pageNum, 20)
         .pipe(mapPaginatedResult(series => CardEntityFactory.series(series)));
     }
   }
@@ -183,6 +186,7 @@ export class DashboardComponent {
     this.isLoadingDashboard.set(true);
     this.streamsLoaded = 0;
     this.streamCount = 0;
+    this.featuredOnDeck.set(null);
     this.cdRef.markForCheck();
 
     this.dashboardService.getDashboardStreams().subscribe(streams => {
@@ -194,6 +198,13 @@ export class DashboardComponent {
             s.api = this.seriesService.getOnDeck(1, 20)
                 .pipe(
                   map(d => d.result.map(series => CardEntityFactory.series(series, { isOnDeck: true }))),
+                  map(items => {
+                    const featured = this.selectFeaturedOnDeck(items);
+                    this.featuredOnDeck.set(featured);
+                    return featured === null
+                      ? items
+                      : items.filter(item => item.data.id !== featured.data.id);
+                  }),
                   tap(() => this.increment()),
                   takeUntilDestroyed(this.destroyRef),
                   shareReplay({bufferSize: 1, refCount: true})
@@ -261,6 +272,25 @@ export class DashboardComponent {
   increment() {
     this.streamsLoaded++;
     this.cdRef.markForCheck();
+  }
+
+  selectFeaturedOnDeck(items: SeriesCardEntity[]): SeriesCardEntity | null {
+    if (items.length === 0) return null;
+
+    const activeItems = items
+      .filter(item => item.data.pagesRead > 0 && item.data.pagesRead < item.data.pages)
+      .sort((a, b) => Date.parse(b.data.latestReadDate) - Date.parse(a.data.latestReadDate));
+
+    return activeItems[0] ?? items[0];
+  }
+
+  progressPercent(series: Series): number {
+    if (series.pages <= 0) return 0;
+    return Math.round((series.pagesRead / series.pages) * 100);
+  }
+
+  readFeaturedSeries(series: Series) {
+    this.readerService.readSeries(series, false);
   }
 
   reloadStream(streamId: number, onDeck = false) {

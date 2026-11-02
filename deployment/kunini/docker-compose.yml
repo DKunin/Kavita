@@ -1,6 +1,6 @@
 services:
   kavita:
-    image: jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
+    image: ${KAVITA_IMAGE:-kavita-kunini:local}
     container_name: kavita
     restart: unless-stopped
     user: "1000:1000"

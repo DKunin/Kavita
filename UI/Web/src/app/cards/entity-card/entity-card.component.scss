@@ -112,7 +112,7 @@
     height: var(--card-image-height);
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
-    transition: all 0.2s;
+    transition: background-color 150ms ease-out;
   }
 
   .overlay {
@@ -216,7 +216,7 @@
     height: var(--card-image-height);
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
-    transition: all 0.2s;
+    transition: background-color 150ms ease-out;
 
     .card-title {
       padding: 0.625rem;
@@ -373,4 +373,3 @@
     color: var(--checkbox-bg-color);
   }
 }
-

@@ -8,6 +8,15 @@
     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 99%, transparent 100%);
 }
 
+.carousel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+}
+
 .carousel-container {
     .section-title {
         font-weight: 400;
@@ -31,7 +40,7 @@
 
 ::ng-deep swiper-slide {
   width: auto !important;
-  margin: 0 .5rem;
+  margin: 0 0.55rem;
 }
 
 ::ng-deep swiper-container {

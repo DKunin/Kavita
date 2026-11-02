@@ -119,7 +119,7 @@
   --table-body-striped-bg-color: var(--elevation-layer2);
 
   /* Navbar */
-  --navbar-bg-color: black;
+  --navbar-bg-color: #111312;
   --navbar-text-color: white;
   --navbar-fa-icon-color: white;
   --navbar-border-radius: 0; // 4px for Plex navbar
@@ -278,13 +278,13 @@
   /* Side Nav */
   --side-nav-width: 14.375rem;
   --side-nav-icon-size: 0.9rem;
-  --side-nav-bg-color: var(--elevation-layer9-dark);
+  --side-nav-bg-color: #1b1e1c;
   --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
   --side-nav-openclose-transition: 0.15s ease-in-out;
   --side-nav-box-shadow: var(--elevation-layer0);
   --side-nav-mobile-box-shadow: 0.1875rem 0em 0.3125rem 10em rgb(0 0 0 / 50%);
   --side-nav-hover-text-color: white;
-  --side-nav-hover-bg-color: black;
+  --side-nav-hover-bg-color: rgb(255 255 255 / 6%);
   --side-nav-text-color: hsla(0, 0%, 100%, .85);
   --side-nav-header-text-color: white;
   --side-nav-border-radius: 0.1875rem;
@@ -296,7 +296,7 @@
   --side-nav-closed-bg-color: transparent;
   --side-nav-item-active-color: var(--primary-color);
   --side-nav-item-active-text-color: #fff;
-  --side-nav-active-bg-color: transparent;
+  --side-nav-active-bg-color: color-mix(in srgb, var(--primary-color) 13%, transparent);
   --side-nav-overlay-color: var(--elevation-layer11-dark);
   --side-nav-item-color: rgb(255 255 255 / 9%);
   --side-nav-item-closed-color: var(--elevation-layer10);

@@ -73,48 +73,111 @@
 
       <ng-template #onDeck let-stream: DashboardStream>
         @if(stream.api | async; as data) {
-          <app-carousel-reel
-            [items]="data"
-            [title]="t('on-deck-title')"
-            [nextPageLoader]="onDeckNextPage(stream)"
-            (sectionClick)="handleSectionClick(StreamId.OnDeck)"
-          >
-            <ng-template #carouselItem let-item>
-              <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
-                               (dataChanged)="reloadStream(stream.id, true)" />
-            </ng-template>
-          </app-carousel-reel>
+          <div class="dashboard-leading-grid">
+            @if (featuredOnDeck(); as featured) {
+              <section class="continue-reading" aria-labelledby="continue-reading-title">
+                <app-image
+                  class="feature-backdrop"
+                  [imageUrl]="imageService.getSeriesCoverImage(featured.data.id)"
+                  width="100%"
+                  height="100%"
+                  objectFit="cover"
+                />
+                <div class="feature-scrim" aria-hidden="true"></div>
+
+                <div class="feature-cover">
+                  <app-image
+                    [imageUrl]="imageService.getSeriesCoverImage(featured.data.id)"
+                    width="100%"
+                    height="100%"
+                    objectFit="cover"
+                  />
+                </div>
+
+                <div class="feature-content">
+                  <p class="feature-eyebrow" id="continue-reading-title">{{t('continue-reading-title')}}</p>
+                  <h1>{{featured.data.name}}</h1>
+                  <p class="feature-library">{{featured.data.libraryName}}</p>
+
+                  <div class="feature-progress-copy">
+                    <span>{{t('progress-label', {progress: progressPercent(featured.data)})}}</span>
+                    <span>{{featured.data.pagesRead}} / {{featured.data.pages}}</span>
+                  </div>
+                  <div
+                    class="feature-progress"
+                    role="progressbar"
+                    [attr.aria-label]="t('progress-label', {progress: progressPercent(featured.data)})"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-valuenow]="progressPercent(featured.data)"
+                  >
+                    <span [style.width.%]="progressPercent(featured.data)"></span>
+                  </div>
+
+                  <div class="feature-actions">
+                    <button class="btn btn-primary" type="button" (click)="readFeaturedSeries(featured.data)">
+                      <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+                      {{t('continue-reading-action')}}
+                    </button>
+                    <a class="btn btn-outline-secondary" [routerLink]="['/library', featured.data.libraryId, 'series', featured.data.id]">
+                      {{t('view-details')}}
+                      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </div>
+                </div>
+              </section>
+            }
+
+            <div class="dashboard-stream on-deck-stream">
+              <app-carousel-reel
+                [items]="data"
+                [pageSize]="19"
+                [title]="t('on-deck-title')"
+                [nextPageLoader]="onDeckNextPage(stream)"
+                (sectionClick)="handleSectionClick(StreamId.OnDeck)"
+              >
+                <ng-template #carouselItem let-item>
+                  <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
+                                   (dataChanged)="reloadStream(stream.id, true)" />
+                </ng-template>
+              </app-carousel-reel>
+            </div>
+          </div>
         }
       </ng-template>
 
       <ng-template #recentlyUpdated let-stream: DashboardStream>
         @if(stream.api | async; as data) {
           <!-- NOTE: We cannot paginate this (backend cannot provide page info) so this would load endlessly -->
-          <app-carousel-reel
-            [items]="data"
-            [title]="t('recently-updated-title')"
-            (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
-          >
-            <ng-template #carouselItem let-item>
-              <app-entity-card [entity]="item" [config]="recentlyUpdatedConfig()" />
-            </ng-template>
-          </app-carousel-reel>
+          <div class="dashboard-stream">
+            <app-carousel-reel
+              [items]="data"
+              [title]="t('recently-updated-title')"
+              (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
+            >
+              <ng-template #carouselItem let-item>
+                <app-entity-card [entity]="item" [config]="recentlyUpdatedConfig()" />
+              </ng-template>
+            </app-carousel-reel>
+          </div>
         }
       </ng-template>
 
       <ng-template #newlyUpdated let-stream: DashboardStream>
         @if(stream.api | async; as data) {
-          <app-carousel-reel
-            [items]="data"
-            [title]="t('recently-added-title')"
-            [nextPageLoader]="onRecentlyAddedNextPage(stream)"
-            (sectionClick)="handleSectionClick(StreamId.NewlyAddedSeries)"
-          >
-            <ng-template #carouselItem let-item>
-              <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
-                               (dataChanged)="reloadStream(stream.id)" />
-            </ng-template>
-          </app-carousel-reel>
+          <div class="dashboard-stream">
+            <app-carousel-reel
+              [items]="data"
+              [title]="t('recently-added-title')"
+              [nextPageLoader]="onRecentlyAddedNextPage(stream)"
+              (sectionClick)="handleSectionClick(StreamId.NewlyAddedSeries)"
+            >
+              <ng-template #carouselItem let-item>
+                <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
+                                 (dataChanged)="reloadStream(stream.id)" />
+              </ng-template>
+            </app-carousel-reel>
+          </div>
         }
       </ng-template>
 
@@ -137,4 +200,3 @@
     <app-loading [loading]="isLoadingDashboard() || (streamCount !== streamsLoaded)" />
   </ng-container>
 </div>
-

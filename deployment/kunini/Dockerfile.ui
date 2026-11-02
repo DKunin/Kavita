@@ -1,0 +1,17 @@
+FROM --platform=$BUILDPLATFORM node:24.15.0-bookworm-slim@sha256:4e6b70dd6cbfc88c8157ba19aa3d9f9cce6ba4703576d55459e45efcbc9c5f5d AS ui-build
+
+WORKDIR /src
+
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
+
+COPY . ./
+RUN npm run prod
+
+FROM jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
+
+ARG SOURCE_REVISION=unknown
+LABEL org.opencontainers.image.revision="${SOURCE_REVISION}"
+
+RUN rm -rf /kavita/wwwroot/*
+COPY --from=ui-build --chown=1000:1000 /src/dist/browser/ /kavita/wwwroot/

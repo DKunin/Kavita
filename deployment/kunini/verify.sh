@@ -2,7 +2,11 @@
 set -euo pipefail
 
 domain="books.kunini.ru"
-expected_image="jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a"
+app_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(git -C "${app_dir}" rev-parse --show-toplevel)"
+expected_revision="$(git -C "${repo_dir}" rev-parse HEAD)"
+short_revision="$(git -C "${repo_dir}" rev-parse --short=12 HEAD)"
+expected_image="${KAVITA_IMAGE:-kavita-kunini:${short_revision}}"
 password_file="/var/apps/kavita/secrets/admin-password"
 api_key_file="/var/apps/kavita/secrets/dkunin-kover-api-key"
 temporary_dir="$(mktemp -d)"
@@ -17,9 +21,14 @@ health="$(docker inspect kavita --format '{{.State.Health.Status}}')"
 published_port="$(docker port kavita 5000/tcp)"
 books_mode="$(docker inspect kavita --format '{{range .Mounts}}{{if eq .Destination "/books"}}{{.Mode}}{{end}}{{end}}')"
 configured_image="$(docker inspect kavita --format '{{.Config.Image}}')"
+configured_revision="$(docker inspect kavita --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
 if [[ "${health}" != "healthy" || "${published_port}" != "127.0.0.1:5000" \
     || "${books_mode}" != "ro" || "${configured_image}" != "${expected_image}" ]]; then
     echo "Container health, listener, image, or media mount verification failed." >&2
+    exit 1
+fi
+if [[ "${expected_image}" == kavita-kunini:* && "${configured_revision}" != "${expected_revision}" ]]; then
+    echo "The running UI image does not match the deployed Git revision." >&2
     exit 1
 fi
 

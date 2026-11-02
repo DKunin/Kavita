@@ -1,4 +1,306 @@
+@use '../../../theme/variables' as theme;
+
+:host {
+  --dashboard-surface: color-mix(in srgb, var(--card-bg-color) 88%, black);
+  --dashboard-border: rgb(255 255 255 / 9%);
+  --dashboard-muted: color-mix(in srgb, var(--body-text-color) 62%, transparent);
+}
+
 .main-container {
-    margin-top: 0.625rem;
-    padding: 0 0 0 0.625rem;
+  margin-top: 0.75rem;
+  padding: 0 1rem 2rem;
+}
+
+.dashboard-leading-grid {
+  display: grid;
+  grid-template-columns: minmax(30rem, 1.15fr) minmax(26rem, 0.85fr);
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.75rem;
+}
+
+.continue-reading {
+  position: relative;
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr);
+  gap: 1.25rem;
+  min-height: 17.25rem;
+  padding: 1rem;
+  overflow: hidden;
+  background: var(--dashboard-surface);
+  border: 0.0625rem solid var(--dashboard-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 18%), 0 0.125rem 0.5rem rgb(0 0 0 / 18%);
+}
+
+.feature-backdrop,
+.feature-scrim {
+  position: absolute;
+  inset: 0;
+}
+
+.feature-backdrop {
+  opacity: 0.16;
+  filter: blur(2.25rem) saturate(0.8);
+  transform: scale(1.18);
+  pointer-events: none;
+}
+
+.feature-scrim {
+  background: rgb(20 23 21 / 78%);
+  pointer-events: none;
+}
+
+.feature-cover,
+.feature-content {
+  position: relative;
+  z-index: 1;
+}
+
+.feature-cover {
+  width: 10rem;
+  aspect-ratio: 0.6875;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 32%);
+}
+
+:host ::ng-deep .feature-cover img {
+  border-radius: inherit;
+  outline: 0.0625rem solid rgb(255 255 255 / 12%);
+  outline-offset: -0.0625rem;
+}
+
+.feature-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.25rem 0;
+}
+
+.feature-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feature-content h1 {
+  margin: 0;
+  font-family: "EBGarmond", Georgia, serif;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 500;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.feature-library {
+  margin: 0.4rem 0 auto;
+  color: var(--dashboard-muted);
+  font-size: 0.9rem;
+  text-wrap: pretty;
+}
+
+.feature-progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0.45rem;
+  color: var(--dashboard-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.feature-progress {
+  height: 0.35rem;
+  overflow: hidden;
+  background: rgb(255 255 255 / 14%);
+  border-radius: 999px;
+}
+
+.feature-progress span {
+  display: block;
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: inherit;
+}
+
+.feature-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.feature-actions .btn {
+  display: inline-flex;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border-radius: 0.5rem;
+  transition-property: transform, background-color, border-color, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.feature-actions .btn:active {
+  transform: scale(0.98);
+}
+
+.on-deck-stream {
+  min-width: 0;
+  padding-top: 0.25rem;
+}
+
+:host ::ng-deep app-carousel-reel {
+  .carousel-container {
+    margin-bottom: 1.75rem !important;
+  }
+
+  .header {
+    margin-bottom: 0.65rem;
+    font-family: "EBGarmond", Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .section-title {
+    margin-left: 0;
+    color: var(--body-text-color);
+  }
+}
+
+:host ::ng-deep .dashboard-stream app-entity-card {
+  .card-item-container > .card {
+    overflow: hidden;
+    border: 0.0625rem solid var(--dashboard-border);
+    border-radius: 0.625rem;
+    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 16%);
+    transition-property: transform, border-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .card-item-container > .card:hover,
+  .card-item-container > .card:focus-within {
+    border-color: rgb(74 198 148 / 48%);
+    box-shadow: 0 0.75rem 1.75rem rgb(0 0 0 / 28%);
+    transform: translateY(-0.125rem);
+  }
+
+  .overlay,
+  .card-overlay,
+  app-image img {
+    border-top-left-radius: 0.5625rem !important;
+    border-top-right-radius: 0.5625rem !important;
+  }
+
+  app-image img {
+    outline: 0.0625rem solid rgb(255 255 255 / 10%);
+    outline-offset: -0.0625rem;
+  }
+
+  .card-title-container {
+    min-height: 3.4rem;
+    padding: 0.35rem 0.25rem 0.4rem 0.4rem;
+    background: color-mix(in srgb, var(--card-bg-color) 92%, black);
+  }
+
+  .card-title-container .card-title {
+    padding: 0.3rem 0.2rem;
+    text-align: left;
+  }
+
+  .card-title-container .card-title a {
+    display: -webkit-box;
+    min-height: 2.1rem;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.05rem;
+    text-overflow: ellipsis;
+    white-space: normal;
+    text-wrap: pretty;
+  }
+}
+
+@media (max-width: 75rem) {
+  .dashboard-leading-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .on-deck-stream {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: theme.$grid-breakpoints-md) {
+  .main-container {
+    padding: 0 0.75rem 1.5rem;
+  }
+
+  .dashboard-leading-grid {
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .continue-reading {
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0.9rem;
+    min-height: 12rem;
+    padding: 0.75rem;
+    border-radius: 0.625rem;
+  }
+
+  .feature-cover {
+    width: 7rem;
+    border-radius: 0.4rem;
+  }
+
+  .feature-content h1 {
+    font-size: clamp(1.6rem, 7vw, 2rem);
+  }
+
+  .feature-library {
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-progress-copy {
+    margin-top: 0.5rem;
+  }
+
+  .feature-actions {
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .feature-actions .btn {
+    min-height: 2.5rem;
+    padding-inline: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  :host ::ng-deep app-carousel-reel .header {
+    font-size: 1.55rem;
+  }
+}
+
+@media (max-width: 25rem) {
+  .continue-reading {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+  }
+
+  .feature-cover {
+    width: 5.5rem;
+  }
+
+  .feature-actions .btn-outline-secondary {
+    display: none;
+  }
 }

@@ -15,13 +15,30 @@ Bookmark; `dkunin` сохраняет Admin. Парольный вход Kavita 
 
 ## Деплой
 
-На сервере используется sparse checkout репозитория:
+UI собирается локально поверх того же pinned runtime-образа Kavita. Тег образа
+содержит сокращённый Git SHA, а полный SHA записывается в OCI label:
+
+```bash
+./deployment/kunini/build-ui-image.sh
+image="kavita-kunini:$(git rev-parse --short=12 HEAD)"
+docker save "${image}" | gzip | ssh <production-host> 'gunzip | docker load'
+```
+
+На сервере используется sparse checkout репозитория. После загрузки образа:
 
 ```bash
 cd /var/apps/kavita
 git pull --ff-only
 ./deployment/kunini/deploy.sh
 ./deployment/kunini/setup-nginx.sh
+```
+
+Для отката можно временно запустить исходный pinned-образ, не меняя данные или
+конфигурацию:
+
+```bash
+KAVITA_IMAGE='jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a' \
+  ./deployment/kunini/deploy.sh
 ```
 
 Проверка production:

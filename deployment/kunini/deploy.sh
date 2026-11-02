@@ -2,15 +2,24 @@
 set -euo pipefail
 
 app_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(git -C "${app_dir}" rev-parse --show-toplevel)"
 config_dir="${app_dir}/config"
 books_dir="/mnt/data/plex/books"
+revision="$(git -C "${repo_dir}" rev-parse --short=12 HEAD)"
+image="${KAVITA_IMAGE:-kavita-kunini:${revision}}"
+export KAVITA_IMAGE="${image}"
 
 install -d -m 0700 "${config_dir}"
 install -d -m 0755 "${books_dir}"
 
 cd "${app_dir}"
 docker compose config --quiet
-docker compose pull --quiet
+if [[ "${image}" == jvmilazz0/* ]]; then
+    docker pull --quiet "${image}"
+elif ! docker image inspect "${image}" >/dev/null 2>&1; then
+    printf 'Required local image %s is not loaded. Build and transfer it before deployment.\n' "${image}" >&2
+    exit 1
+fi
 docker compose up -d --remove-orphans
 
 for _ in $(seq 1 60); do
