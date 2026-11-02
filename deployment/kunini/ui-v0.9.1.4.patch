@@ -526,7 +526,7 @@ index 74c4a03cc..e89c4a006 100644
 +  }
 +
 +  .feature-actions .btn {
-+    min-height: 2.5rem;
++    min-height: 2.75rem;
 +    padding-inline: 0.75rem;
 +    font-size: 0.8rem;
 +  }
@@ -700,4 +700,3 @@ index 86b81ad7d..932bccba1 100644
    --side-nav-overlay-color: var(--elevation-layer11-dark);
    --side-nav-item-color: rgb(255 255 255 / 9%);
    --side-nav-item-closed-color: var(--elevation-layer10);
-
