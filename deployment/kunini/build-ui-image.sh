@@ -10,15 +10,19 @@ ui_source_ref="v0.9.1.4"
 ui_patch="${app_dir}/ui-v0.9.1.4.patch"
 mkdir -p "${repo_dir}/tmp"
 build_root="$(mktemp -d "${repo_dir}/tmp/kavita-ui-build.XXXXXX")"
+archive_path="${build_root}/source.tar"
+relative_build_root="${build_root#"${repo_dir}/"}"
 
 cleanup() {
     rm -rf -- "${build_root}"
 }
 trap cleanup EXIT
 
-git -C "${repo_dir}" archive "${ui_source_ref}^{commit}" | tar -x -C "${build_root}"
-git -C "${build_root}" apply --check "${ui_patch}"
-git -C "${build_root}" apply "${ui_patch}"
+git -C "${repo_dir}" archive --format=tar --output="${archive_path}" "${ui_source_ref}^{commit}"
+tar -xf "${archive_path}" -C "${build_root}"
+rm "${archive_path}"
+git -C "${repo_dir}" apply --directory="${relative_build_root}" --check "${ui_patch}"
+git -C "${repo_dir}" apply --directory="${relative_build_root}" "${ui_patch}"
 
 docker build \
     --platform linux/amd64 \
