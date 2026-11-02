@@ -145,7 +145,7 @@ export class ActivityGraphComponent {
     const startDate = new Date(this.year(), 0, 1);
     const endDate = new Date(this.year(), 11, 31);
 
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
 
     // Get the first Saturday
     const firstDayOfWeek = currentDate.getDay();

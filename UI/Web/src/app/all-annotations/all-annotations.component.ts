@@ -102,15 +102,15 @@ export class AllAnnotationsComponent implements OnInit {
       const updatedEntities = result.entity;
       if (updatedEntities == null || updatedEntities.length === 0) return;
 
-      let updatedItems: Annotation[] = [];
       switch (result.effect) {
-        case "update":
-          updatedItems = this.annotations().map(item => {
+        case "update": {
+          const updatedItems = this.annotations().map(item => {
             const updated = updatedEntities.find(u => u.id === item.id);
             return updated ? { ...updated } : item;
           });
           this.annotations.set([...updatedItems]);
           break;
+        }
         case "remove":
           const removedIds = new Set(updatedEntities.map(u => u.id));
 

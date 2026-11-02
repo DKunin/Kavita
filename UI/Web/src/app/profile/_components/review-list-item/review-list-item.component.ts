@@ -43,13 +43,6 @@ export class ReviewListItemComponent {
   title = computed(() => {
     const item = this.review();
     if (item.chapterId) {
-      //if ( === LooseLeafOrDefaultNumber)
-
-      // If there is no actual title name, use a Chapter/Volume formatting
-      if (item.chapter?.titleName === item.series.name) {
-
-      }
-
       return item.chapter?.titleName || item.series.name;
     }
 

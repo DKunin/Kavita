@@ -97,7 +97,7 @@ export class MetadataService {
   }
 
   getAllReadingListTags() {
-    let method = 'metadata/readinglist-tags'
+    const method = 'metadata/readinglist-tags'
     return this.httpClient.get<Array<ReadingListTag>>(this.baseUrl + method);
   }
 

@@ -108,4 +108,4 @@ export interface ReadingListInfo extends IHasReadingTime, IHasReadingTime {
   avgHoursToRead: number;
 }
 
-export interface ReadingListCast extends IHasCast {}
+export type ReadingListCast = IHasCast;

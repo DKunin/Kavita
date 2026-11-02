@@ -19,7 +19,7 @@ import {disabled, form, FormField, max, min, pattern, required} from "@angular/f
 import {emptyOrPattern} from "../../_validators/empty-or-pattern.validator";
 import {url} from "../../_validators/url.validator";
 
-const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
+const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}:){0,7}([\da-f]{0,4})))\s*,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}:){0,7}([\da-f]{0,4})))\s*$/i;
 
 interface FormModel {
   cacheDirectory: string;

@@ -54,7 +54,7 @@ export class ImportMalCollectionComponent {
 
       // Create a map on sourceUrl from collections so that if there are non-null sourceUrl (and source is MAL) then we can disable buttons
       const collects = res.allCollections.filter(c => c.source === ScrobbleProvider.Mal && c.sourceUrl);
-      for(let col of collects) {
+      for(const col of collects) {
         if (col.sourceUrl === null) continue;
         this.collectionMap.update(m => {
           m[col.sourceUrl!] = col;

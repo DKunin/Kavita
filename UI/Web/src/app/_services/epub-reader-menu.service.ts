@@ -45,15 +45,15 @@ export class EpubReaderMenuService {
 
     // Set CSS variable for drawer height
     setTimeout(() => {
-      var drawerElement = document.querySelector('view-edit-annotation-drawer, app-view-edit-annotation-drawer');
+      const drawerElement = document.querySelector('view-edit-annotation-drawer, app-view-edit-annotation-drawer');
       if (!drawerElement) return;
-      var setDrawerHeightVar = function() {
+      const setDrawerHeightVar = function() {
         if (!drawerElement) return;
-        var height = (drawerElement as HTMLElement).offsetHeight;
+        const height = (drawerElement as HTMLElement).offsetHeight;
         document.documentElement.style.setProperty('--drawer-height', height + 'px');
       };
       setDrawerHeightVar();
-      var resizeObserver = new window.ResizeObserver(function() {
+      const resizeObserver = new window.ResizeObserver(function() {
         setDrawerHeightVar();
       });
       resizeObserver.observe(drawerElement as HTMLElement);
@@ -171,15 +171,15 @@ export class EpubReaderMenuService {
 
     // Set CSS variable for drawer height
     setTimeout(() => {
-      var drawerElement = document.querySelector('view-edit-annotation-drawer, app-view-edit-annotation-drawer');
+      const drawerElement = document.querySelector('view-edit-annotation-drawer, app-view-edit-annotation-drawer');
       if (!drawerElement) return;
-      var setDrawerHeightVar = function() {
+      const setDrawerHeightVar = function() {
         if (!drawerElement) return;
-        var height = (drawerElement as HTMLElement).offsetHeight;
+        const height = (drawerElement as HTMLElement).offsetHeight;
         document.documentElement.style.setProperty('--drawer-height', height + 'px');
       };
       setDrawerHeightVar();
-      var resizeObserver = new window.ResizeObserver(function() {
+      const resizeObserver = new window.ResizeObserver(function() {
         setDrawerHeightVar();
       });
       resizeObserver.observe(drawerElement as HTMLElement);

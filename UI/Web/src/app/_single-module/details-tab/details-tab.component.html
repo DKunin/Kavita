@@ -42,19 +42,19 @@
           @if (bm.readingTime) {
             <app-label-card [label]="t('read-time-label')" [value]="bm.readingTime | readTime" />
           }
-          <app-label-card [label]="t('pages-label')" [value]="bm.pages != null ? t('pages-count', {num: bm.pages | compactNumber}) : (null | defaultValue)" />
-          <app-label-card [label]="t('words-label')" [value]="bm.words != null ? t('words-count', {num: bm.words | compactNumber}) : (null | defaultValue)" />
+          <app-label-card [label]="t('pages-label')" [value]="bm.pages !== null && bm.pages !== undefined ? t('pages-count', {num: bm.pages | compactNumber}) : (null | defaultValue)" />
+          <app-label-card [label]="t('words-label')" [value]="bm.words !== null && bm.words !== undefined ? t('words-count', {num: bm.words | compactNumber}) : (null | defaultValue)" />
           <app-label-card [label]="t('added-label')" [value]="bm.addedAt | utcToLocalTime:'shortDate'| defaultDate" />
           <app-label-card [label]="t('updated-label')" [value]="(bm.updatedAt ?? null) | timeDifference | defaultValue" />
           <app-label-card [label]="t('kavita-id-label')" [value]="bm.kavitaId | defaultValue" />
-          @if (bm.sortOrder != null) {
+          @if (bm.sortOrder !== null && bm.sortOrder !== undefined) {
             <app-label-card [label]="t('sort-order-label')" [value]="bm.sortOrder | defaultValue" />
           }
-          @if (bm.isSpecial != null) {
+          @if (bm.isSpecial !== null && bm.isSpecial !== undefined) {
             <app-label-card [label]="t('is-special-label')" [value]="bm.isSpecial ? t('yes-label') : t('no-label')"/>
           }
           <app-label-card    [label]="t('language-label')"   [value]="languageDisplay() | defaultValue" />
-          @if (bm.publicationStatus != null) {
+          @if (bm.publicationStatus !== null && bm.publicationStatus !== undefined) {
             <app-label-card [label]="t('pub-status-label')" [value]="bm.publicationStatus | publicationStatus" />
           }
         </div>

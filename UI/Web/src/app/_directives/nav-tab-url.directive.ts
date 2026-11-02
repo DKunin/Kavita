@@ -6,6 +6,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
 
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector -- Existing public selector used with ng-bootstrap navigation.
   selector: 'ul[ngbNav][syncUrlFragment]',
   standalone: true,
 })

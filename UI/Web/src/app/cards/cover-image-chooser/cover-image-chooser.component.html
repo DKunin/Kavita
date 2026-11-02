@@ -12,7 +12,7 @@
       />
     </div>
 
-    @if (config().isLocked != null) {
+    @if (config().isLocked !== null && config().isLocked !== undefined) {
       <div class="d-flex align-items-center gap-2 mt-2 mb-1">
         @if (config().isLocked) {
           <span class="text-warning"><i class="fa fa-lock" aria-hidden="true"></i> {{ t('cover-locked') }}</span>

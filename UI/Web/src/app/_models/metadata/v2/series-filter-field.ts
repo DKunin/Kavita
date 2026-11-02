@@ -44,7 +44,7 @@ export enum SeriesFilterField
 const enumArray = Object.keys(SeriesFilterField)
     .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
     .map(key => {
-        // @ts-ignore
+        // @ts-expect-error -- Numeric enum keys are valid at runtime but rejected by the enum index type.
         return ({key: key, value: SeriesFilterField[key]});
     });
 

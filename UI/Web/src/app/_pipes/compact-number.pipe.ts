@@ -22,13 +22,11 @@ export class CompactNumberPipe implements PipeTransform {
 
   private transformValue(locale: string, value: number) {
     const formatter = new Intl.NumberFormat(locale, {
-      //@ts-ignore
       notation: 'compact', // https://github.com/microsoft/TypeScript/issues/36533
       maximumSignificantDigits: 3
     });
 
     const formatterForDoublePrecision = new Intl.NumberFormat(locale, {
-      //@ts-ignore
       notation: 'compact', // https://github.com/microsoft/TypeScript/issues/36533
       maximumSignificantDigits: 2
     });

@@ -19,8 +19,8 @@ export class A11yClickDirective implements OnInit {
 
   @HostListener('keydown', ['$event'])
   onEvent(event: any) {
-    var keyCodeCondition = function (that: any) {
-      var flag = false;
+    const keyCodeCondition = () => {
+      let flag = false;
       if (!(event.keyCode)) {
         if (event.which) {
           event.keyCode = event.which;
@@ -28,13 +28,12 @@ export class A11yClickDirective implements OnInit {
           event.keyCode = event.charCode;
         }
       }
-      if ((event.keyCode && that.keyCodeArray.indexOf(event.keyCode.toString()) > -1)) {
+      if ((event.keyCode && this.keyCodeArray.indexOf(event.keyCode.toString()) > -1)) {
         flag = true;
       }
       return flag;
     };
-    const that = this;
-    if (this.keyCodeArray.length > 0 && keyCodeCondition(that)) {
+    if (this.keyCodeArray.length > 0 && keyCodeCondition()) {
       this.element.nativeElement.click();
       event.preventDefault();
     }

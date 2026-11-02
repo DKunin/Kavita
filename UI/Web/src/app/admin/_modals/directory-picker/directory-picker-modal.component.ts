@@ -103,7 +103,7 @@ export class DirectoryPickerModalComponent implements OnInit {
 
     if (this.startingFolder() && this.startingFolder().length > 0) {
       let folders = this.startingFolder().split('/');
-      let folders2 = this.startingFolder().split('\\');
+      const folders2 = this.startingFolder().split('\\');
       if (folders.length === 1 && folders2.length > 1) {
         folders = folders2;
       }

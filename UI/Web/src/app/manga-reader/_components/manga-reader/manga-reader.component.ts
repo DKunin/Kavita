@@ -856,7 +856,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handlePageLeft() {
     if (this.isReaderLeftRight() && this.checkIfPaginationAllowed(KeyDirection.Left)) {
-      this.isReadingDirectionLeftToRight() ? this.prevPage() : this.nextPage();
+      if (this.isReadingDirectionLeftToRight()) this.prevPage();
+      else this.nextPage();
     }
   }
 
@@ -872,7 +873,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handlePageRight() {
     if (this.isReaderLeftRight() && this.checkIfPaginationAllowed(KeyDirection.Right)) {
-      this.isReadingDirectionLeftToRight() ? this.nextPage() : this.prevPage();
+      if (this.isReadingDirectionLeftToRight()) this.nextPage();
+      else this.prevPage();
     }
   }
 
@@ -1346,13 +1348,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.nextPage();
         break;
       case KeyDirection.Right:
-        this.isReadingDirectionLeftToRight() ? this.nextPage() : this.prevPage();
+        if (this.isReadingDirectionLeftToRight()) this.nextPage();
+        else this.prevPage();
         break;
       case KeyDirection.Up:
         this.prevPage();
         break;
       case KeyDirection.Left:
-          this.isReadingDirectionLeftToRight() ? this.prevPage() : this.nextPage();
+          if (this.isReadingDirectionLeftToRight()) this.prevPage();
+          else this.nextPage();
           break;
     }
 
@@ -1464,9 +1468,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (direction === KeyDirection.Right) {
-      this.isReadingDirectionLeftToRight() ? this.nextPage(event) : this.prevPage(event);
+      if (this.isReadingDirectionLeftToRight()) this.nextPage(event);
+      else this.prevPage(event);
     } else if (direction === KeyDirection.Left) {
-      this.isReadingDirectionLeftToRight() ? this.prevPage(event) : this.nextPage(event);
+      if (this.isReadingDirectionLeftToRight()) this.prevPage(event);
+      else this.nextPage(event);
     }
   }
 
@@ -1817,7 +1823,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param direction Used to indicate if the chapter is behind or ahead of current chapter
    */
   prefetchStartOfChapter(chapterId: number, direction: PAGING_DIRECTION) {
-    let pages = [];
+    let pages: number[];
 
     if (direction === PAGING_DIRECTION.BACKWARDS) {
       if (this.continuousChapterInfos[ChapterInfoPosition.Previous] === undefined) return;

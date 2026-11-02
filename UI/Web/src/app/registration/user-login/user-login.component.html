@@ -10,7 +10,7 @@
               <div class="mb-3">
                 <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
                 <input class="form-control custom-input" [formField]="formGroup.username" id="username" autocomplete="username"
-                       type="text" autofocus [placeholder]="t('username')"
+                       type="text" [placeholder]="t('username')"
                        [appFormField]="formGroup.username" aria-describedby="username-validations">
                 <app-validation-errors inputId="username" [control]="formGroup.username" />
               </div>

@@ -108,8 +108,8 @@ export class ColorscapeService {
   }
 
   getAverageColour(img: HTMLImageElement, sampleWidth?: number, sampleHeight?: number): RGBAColor | undefined {
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     canvas.width = img.naturalWidth;

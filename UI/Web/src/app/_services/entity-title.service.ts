@@ -91,7 +91,7 @@ export class EntityTitleService {
     }
 
     // Compute titleName
-    let titleName = '';
+    let titleName: string;
     if (isChapter) {
       titleName = (entity as Chapter).titleName || '';
     } else {
@@ -129,7 +129,7 @@ export class EntityTitleService {
   }
 
   private calculateBookRenderText(titleName: string, prioritizeTitleName: boolean, fallbackToVolume: boolean, isChapter: boolean, number: string, volumeTitle: string): string {
-    let renderText = '';
+    let renderText: string;
     if (titleName !== '' && prioritizeTitleName) {
       renderText = titleName;
     } else if (fallbackToVolume && isChapter) {
@@ -143,7 +143,7 @@ export class EntityTitleService {
   }
 
   private calculateLightNovelRenderText(titleName: string, prioritizeTitleName: boolean, fallbackToVolume: boolean, isChapter: boolean, number: string, volumeTitle: string): string {
-    let renderText = '';
+    let renderText: string;
     if (titleName !== '' && prioritizeTitleName) {
       renderText = titleName;
     } else if (fallbackToVolume && isChapter) {
@@ -170,12 +170,6 @@ export class EntityTitleService {
       }
       renderText += titleName;
     } else {
-      if (includeVolume && volumeTitle !== '') {
-        if (number !== LooseLeafOrSpecial && isChapter && includeVolume) {
-          renderText = volumeTitle;
-        }
-      }
-
       if (number !== LooseLeafOrSpecial) {
         if (isChapter) {
           renderText = this.translocoService.translate('entity-title.chapter-num', {num: number});
@@ -198,7 +192,7 @@ export class EntityTitleService {
   }
 
   private calculateImageRenderText(isChapter: boolean, number: string, volumeTitle: string, fallbackToVolume: boolean): string {
-    let renderText = '';
+    let renderText: string;
 
     if (number !== LooseLeafOrSpecial) {
       if (isChapter) {

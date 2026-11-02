@@ -28,7 +28,7 @@
               <span class="text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.06em;">{{t('metadata-source')}}</span>
               <div class="d-flex align-items-center gap-2">
                 <app-metadata-provider-tag-badge [metadataProvider]="info.metadataProvider" />
-                @if (info.lastRefreshedUtc != NULL_DATE) {
+                @if (info.lastRefreshedUtc !== NULL_DATE) {
                   <span class="text-muted" style="font-size: 11px;">
                   <i class="ti ti-refresh" aria-hidden="true"></i> {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}
                   <span class="dot-separator" aria-hidden="true"></span>

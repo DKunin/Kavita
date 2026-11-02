@@ -90,7 +90,7 @@ export function parseContentDisposition(header: string, fallbackName: string): s
 
     const filenameToken = tokens.find(t => t.trim().toLowerCase().startsWith('filename='));
     if (!filenameToken) return fallbackName || 'download';
-    let filename = filenameToken.replace(/filename=/i, '').replace(/"/g, '').trim();
+    const filename = filenameToken.replace(/filename=/i, '').replace(/"/g, '').trim();
 
     if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
       const ext = filename.substring(filename.lastIndexOf('.'), filename.length);

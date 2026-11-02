@@ -14,7 +14,7 @@ export class EpubHighlightService {
   initializeHighlightElements(annotations: Annotation[], container: ViewContainerRef, selectFromElement?: Element | null | undefined,
                               configOptions: {showHighlight: boolean, showIcon: boolean} | null = null) {
     const annotationsMap: {[key: number]: Annotation} = annotations.reduce((map, obj) => {
-      // @ts-ignore
+      // @ts-expect-error -- epub.js exposes this annotation API at runtime but omits it from its typings.
       map[obj.id] = obj;
       return map;
     }, {});

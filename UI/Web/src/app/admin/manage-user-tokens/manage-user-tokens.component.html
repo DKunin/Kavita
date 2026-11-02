@@ -54,7 +54,7 @@
                 </div>
                 <div>
                   @let info = getTokenValidityInfo(item, provider);
-                  @if (info && info.validUntilUtc != NULL_DATE) {
+                  @if (info && info.validUntilUtc !== NULL_DATE) {
                     {{t('token-set-label')}}
                     <span class="text-muted ms-1">{{t('expires-label', {date: info.validUntilUtc | utcToLocalTime:'shortDate'})}}</span>
                   } @else {

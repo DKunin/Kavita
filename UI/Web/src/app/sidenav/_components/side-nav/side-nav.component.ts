@@ -59,8 +59,8 @@ export class SideNavComponent {
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions();
-  homeActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavHomeActions();
-  readingListActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavReadingListActions();
+  homeActions: ActionItem<object>[] = this.actionFactoryService.getSideNavHomeActions();
+  readingListActions: ActionItem<object>[] = this.actionFactoryService.getSideNavReadingListActions();
 
   filterQuery = signal('');
   filterLibrary = (stream: SideNavStream) => matchesQuery(stream, this.filterQuery(), 'name');
@@ -165,12 +165,12 @@ export class SideNavComponent {
 
   }
 
-  performHomeAction(event: ActionItem<{}> | ActionResult<{}>) {
+  performHomeAction(event: ActionItem<object> | ActionResult<object>) {
     if (event.action === Action.Edit) {
       this.showMore(true);
     }
   }
-  performReadingListAction(event: ActionItem<{}> | ActionResult<{}>) {
+  performReadingListAction(event: ActionItem<object> | ActionResult<object>) {
     if (event.action === Action.Navigate) {
       this.router.navigateByUrl('/settings#cbl-import');
       return;

@@ -19,6 +19,7 @@ export class DrawerOptions {
 })
 export class DrawerComponent {
 
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- Preserve the public isOpen binding while keeping a writable local signal.
   isOpenInput = input<boolean>(false, {alias: 'isOpen'});
   isOpen = linkedSignal(this.isOpenInput);
   width = input<number>(400);

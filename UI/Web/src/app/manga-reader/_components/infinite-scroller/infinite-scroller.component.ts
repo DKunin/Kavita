@@ -199,7 +199,7 @@ export class InfiniteScrollerComponent implements OnInit {
    * Kept as a getter (not computed) since it also reads window dimensions, which aren't reactive
    */
   get areImagesWiderThanWindow() {
-    let [_, innerWidth] = this.getInnerDimensions();
+    const [_, innerWidth] = this.getInnerDimensions();
     return this.webtoonImageWidth() > (innerWidth || document.body.clientWidth);
   }
 
@@ -375,12 +375,7 @@ export class InfiniteScrollerComponent implements OnInit {
   getVerticalOffset() {
     const reader = this.scrollElement();
 
-    let offset = 0;
-    if (reader instanceof Window) {
-      offset = reader.scrollY;
-    } else {
-      offset = reader.scrollTop;
-    }
+    const offset = reader instanceof Window ? reader.scrollY : reader.scrollTop;
 
     return (offset
       || document.body.scrollTop

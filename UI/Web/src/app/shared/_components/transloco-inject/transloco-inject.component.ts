@@ -88,10 +88,12 @@ export class TranslocoInjectComponent implements AfterContentInit {
 
     // 3. Split on sentinels and build the part list.
     //    (No second translate() call — we already have the raw string from getTranslation().)
+    // eslint-disable-next-line no-control-regex -- Null-byte sentinels cannot collide with translation text.
     const segments = processed.split(/(\x00SLOT:[^\x00]+\x00)/);
     this.parts.set(
       segments
         .map((seg): Part => {
+          // eslint-disable-next-line no-control-regex -- Matches the synthetic null-byte sentinel created above.
           const m = seg.match(/^\x00SLOT:([^\x00]+)\x00$/);
           return m ? { type: 'slot', name: m[1] } : { type: 'text', value: seg };
         })

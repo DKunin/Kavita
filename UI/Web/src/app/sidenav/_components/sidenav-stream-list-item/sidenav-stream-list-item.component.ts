@@ -27,7 +27,7 @@ export class SidenavStreamListItemComponent {
     if (!host)
       return '';
 
-    return host + 'login' + (!!apiKey ? 'apiKey=' + apiKey : '');
+    return host + 'login' + (apiKey ? 'apiKey=' + apiKey : '');
   });
   loadFilterUrl = computed(() => {
     return this.baseUrl + FilterUtilitiesService.getFilterLink(this.item().entityType, this.item().smartFilterEncoded ?? '');

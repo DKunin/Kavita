@@ -1473,7 +1473,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         maxWidth = `${this.getVerticalPageWidth()}px`;
         break
       case BookPageLayoutMode.Column2: {
-        maxWidth = `${this.getVerticalPageWidth()}px`;
         if (isVerticalWritingStyle && !this.isSingleImagePage)  {
           maxHeight = `${height / 2}px`;
         } else {
@@ -1627,7 +1626,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     const pageSize = this.measuredPageSize();
     if (pageSize <= 0) return;
-    let [_, totalScroll] = this.getScrollOffsetAndTotalScroll();
+    let totalScroll = this.getScrollOffsetAndTotalScroll()[1];
 
     if (oldEmptyGap) totalScroll -= pageSize/2;
     const lastPageSize = totalScroll % pageSize;
@@ -1840,7 +1839,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
     const delta = totalScroll - scrollOffset;
-    let currentVirtualPage = 1;
+    let currentVirtualPage: number;
 
     //If first virtual page, i.e. totalScroll and delta are the same value
     if (totalScroll === delta) {
@@ -1930,7 +1929,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     if (intersectingEntries.length > 0) {
       const element = this.findTopLevelElement(intersectingEntries[0], intersectingEntries[1], bookContentElement);
-      let path = this.readerService.getXPathTo(element);
+      const path = this.readerService.getXPathTo(element);
       if (path === '') return;
 
       resumeElement = path;
@@ -1970,10 +1969,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     if (target.parentElement === nextSibling.parentElement) return target;
 
     const ancestors: Element[] = [];
-    let current: Element | null = null
-
     // Collect all parent element from the next sibling
-    current = nextSibling.parentElement;
+    let current: Element | null = nextSibling.parentElement;
     while (current && current !== root) {
       ancestors.push(current);
       current = current.parentElement;
@@ -1982,7 +1979,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     // Traverse up from target to find the similar parent with nextSibling
     current = target;
     while (current && current !== root) {
-      let parent: Element | null = current.parentElement;
+      const parent: Element | null = current.parentElement;
 
       if (parent && ancestors.includes(parent)) {
         return current;
@@ -2228,7 +2225,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       afterFrame(() => {
         // scrollIntoView method will only scroll to the visible area of the element (not including margin)
         // so we need to apply scroll-margin to that element to correctly scroll into it
-        let margin = window.getComputedStyle(element).margin;
+        const margin = window.getComputedStyle(element).margin;
         if(margin !== '0px') element.style.scrollMargin = margin;
 
         this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}})
@@ -2254,13 +2251,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       partSelector = partSelector.substring(1, partSelector.length);
     }
 
-    let element: Element | null = null;
-    if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
-      // Part selector is a XPATH
-      element = this.readerService.getElementFromXPath(partSelector);
-    } else {
-      element = this.document.querySelector('*[id="' + partSelector + '"]');
-    }
+    const element = partSelector.startsWith('//') || partSelector.startsWith('id(')
+      ? this.readerService.getElementFromXPath(partSelector)
+      : this.document.querySelector('*[id="' + partSelector + '"]');
 
     return element ?? null;
   }
@@ -2408,7 +2401,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   clearTimeout(timeoutId: number | undefined) {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
-      timeoutId = undefined;
     }
   }
 

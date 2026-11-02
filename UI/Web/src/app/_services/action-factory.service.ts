@@ -48,8 +48,8 @@ export class ActionFactoryService {
   private personActions: Array<ActionItem<Person>> = [];
   private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
-  private sideNavHomeActions: Array<ActionItem<{}>> = [];
-  private sideNavReadingListActions: Array<ActionItem<{}>> = [];
+  private sideNavHomeActions: Array<ActionItem<object>> = [];
+  private sideNavReadingListActions: Array<ActionItem<object>> = [];
   private annotationActions: Array<ActionItem<Annotation>> = [];
   private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
@@ -162,7 +162,7 @@ export class ActionFactoryService {
     );
   }
 
-  getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+  getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<object> = this.basicReadRender) {
     // If the caller doesn't pass a render function, assume that readonly users cannot perform actions
     const renderFunc = shouldRenderFunc === this.basicReadRender
       ? (action: ActionItem<any>, entity: any, user: User) => !this.accountService.hasReadOnlyRole()
@@ -175,7 +175,7 @@ export class ActionFactoryService {
     );
   }
 
-  getSideNavReadingListActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+  getSideNavReadingListActions(shouldRenderFunc: ActionShouldRenderFunc<object> = this.basicReadRender) {
     // If the caller doesn't pass a render function, assume that readonly users cannot perform actions
     const renderFunc = shouldRenderFunc === this.basicReadRender
       ? (action: ActionItem<any>, entity: any, user: User) => !this.accountService.hasReadOnlyRole()
@@ -235,7 +235,7 @@ export class ActionFactoryService {
     const tasks = [];
 
     let actionItem;
-    for (let parent of actions) {
+    for (const parent of actions) {
       if (parent.action === Action.SendTo) continue;
 
       if (parent.children.length === 0) {
@@ -249,7 +249,7 @@ export class ActionFactoryService {
         continue;
       }
 
-      for (let child of parent.children) {
+      for (const child of parent.children) {
         if (child.action === Action.SendTo) continue;
         actionItem = {...child};
         actionItem.title = translate('actionable.' + actionItem.title);

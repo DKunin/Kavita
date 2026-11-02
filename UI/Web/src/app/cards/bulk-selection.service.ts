@@ -164,7 +164,7 @@ export class BulkSelectionService {
     if (!this.selectedCards.hasOwnProperty(dataSource)) return [];
 
     const ret = [];
-    for(let k in this.selectedCards[dataSource]) {
+    for(const k in this.selectedCards[dataSource]) {
       if (this.selectedCards[dataSource][k]) {
         ret.push(k);
       }

@@ -152,7 +152,7 @@ export class ManageSmartFiltersComponent implements OnInit {
 
       const newApiMap: { [key: number]: Observable<any> } = {};
       this.filterApiMap.set({});
-      for(let filter of filters) {
+      for(const filter of filters) {
         newApiMap[filter.id] = this.filterUtilityService.decodeFilter(filter.filter).pipe(
           switchMap(filter => {
             switch (filter.entityType) {

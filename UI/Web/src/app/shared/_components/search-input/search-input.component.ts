@@ -10,7 +10,7 @@ let nextId = 0;
  * accessible (visually-hidden) label. Two ways to handle the label:
  *  - pass a translated {@link label} and the component renders its own visually-hidden label + placeholder, or
  *  - omit {@link label} and pass an {@link inputId} that matches an external `<label for="...">`.
- * The debounced {@link search} output is what consumers should react to; {@link value}/valueChange stay
+ * The debounced {@link searchChange} output is what consumers should react to; {@link value}/valueChange stay
  * immediate so the text and clear button remain responsive.
  */
 @Component({
@@ -34,7 +34,7 @@ export class SearchInputComponent {
   /** Debounce before the search output emits. 0 = immediate. */
   debounceMs = input<number>(300);
   /** Debounced, de-duplicated search value. */
-  search = output<string>();
+  searchChange = output<string>();
 
   clearAriaLabel = computed(() => this.clearLabel() || this.translocoService.translate('search-input.clear'));
 
@@ -44,7 +44,7 @@ export class SearchInputComponent {
       switchMap(v => this.debounceMs() > 0 ? timer(this.debounceMs()).pipe(map(() => v)) : of(v)),
       distinctUntilChanged(),
       takeUntilDestroyed(),
-    ).subscribe(v => this.search.emit(v));
+    ).subscribe(v => this.searchChange.emit(v));
   }
 
   onInput(value: string) {

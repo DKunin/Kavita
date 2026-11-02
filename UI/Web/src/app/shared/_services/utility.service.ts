@@ -98,13 +98,13 @@ export class UtilityService {
 
   filter(input: string, filter: string): boolean {
     if (input === null || filter === null || input === undefined || filter === undefined) return false;
-    const reg = /[_\.\-]/gi;
+    const reg = /[_.-]/gi;
     return input.toUpperCase().replace(reg, '').includes(filter.toUpperCase().replace(reg, ''));
   }
 
   filterMatches(input: string, filter: string): boolean {
     if (input === null || filter === null || input === undefined || filter === undefined) return false;
-    const reg = /[_\.\-]/gi;
+    const reg = /[_.-]/gi;
     return input.toUpperCase().replace(reg, '') === filter.toUpperCase().replace(reg, '');
   }
 

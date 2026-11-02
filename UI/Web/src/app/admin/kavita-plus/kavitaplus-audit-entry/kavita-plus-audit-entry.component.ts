@@ -113,11 +113,11 @@ export class KavitaPlusAuditEntryComponent {
   });
 
   provider = computed(() => {
-    if (!!this.entry().scrobbleDetails?.provider) {
+    if (this.entry().scrobbleDetails?.provider) {
       return this.entry().scrobbleDetails!.provider;
     }
 
-    if (!!this.entry().systemDetails?.provider) {
+    if (this.entry().systemDetails?.provider) {
       return this.entry().systemDetails!.provider;
     }
 

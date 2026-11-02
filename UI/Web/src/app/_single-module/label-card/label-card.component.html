@@ -1,6 +1,6 @@
 <div class="label-card">
   <span class="label-card-label">{{label()}}</span>
-  @if (value() != null) {
+  @if (value() !== null && value() !== undefined) {
     @if (linkUrl()) {
       <a class="label-card-value" [href]="linkUrl() | safeUrl" target="_blank" rel="noopener noreferrer">
         {{value()}}<i class="fa-solid fa-external-link ms-1" aria-hidden="true"></i>

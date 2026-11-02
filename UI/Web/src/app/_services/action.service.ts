@@ -876,9 +876,9 @@ export class ActionService {
 
   /**
    * Centralized handler for all side nav home stream actions.
-   * Returns Observable<ActionResult<{}>> so the caller can react to effects.
+   * Returns Observable<ActionResult<object>> so the caller can react to effects.
    */
-  handleSideNavHomeStream(action: ActionItem<{}>, entity: {}) {
+  handleSideNavHomeStream(action: ActionItem<object>, entity: object) {
     switch (action.action) {
       case Action.Edit:
         return of(this.fromAction(action, entity, 'none'));
@@ -888,7 +888,7 @@ export class ActionService {
     }
   }
 
-  handleSideNavReadingListStream(action: ActionItem<{}>, entity: {}) {
+  handleSideNavReadingListStream(action: ActionItem<object>, entity: object) {
     switch (action.action) {
       case Action.Navigate:
         return of(this.fromAction(action, entity, 'none'));
@@ -1257,7 +1257,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        for (let c of collections) this.downloadService.download(DownloadEntityType.Collection, c, 0, 0);
+        for (const c of collections) this.downloadService.download(DownloadEntityType.Collection, c, 0, 0);
         return of(this.fromAction(action, collections, 'none'));
 
       default:

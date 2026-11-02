@@ -112,7 +112,7 @@ export class NavService {
       const event = (evt as NavigationEnd);
       const url = event.urlAfterRedirects || event.url;
       return (
-        /\/admin\/dashboard(#.*)?/.test(url) || /\/preferences(\/[^\/]+|#.*)?/.test(url) || /\/settings(\/[^\/]+|#.*)?/.test(url)
+        /\/admin\/dashboard(#.*)?/.test(url) || /\/preferences(\/[^/]+|#.*)?/.test(url) || /\/settings(\/[^/]+|#.*)?/.test(url)
       );
     }),
     takeUntilDestroyed(this.destroyRef),

@@ -161,7 +161,7 @@ export class ScrollService {
 
       if (targetPosition) {
         let isComplete = true;
-        let deltaInfo: any = {};
+        const deltaInfo: any = {};
 
         if (targetPosition.x !== undefined) {
           const deltaX = Math.abs(currentX - targetPosition.x);

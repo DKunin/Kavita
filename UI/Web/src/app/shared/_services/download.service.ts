@@ -657,7 +657,7 @@ export class DownloadService {
     this.debugLog('downloadReadingList()', readingList.title);
 
     // We need to check if this instance has items or not
-    let items$ = readingList.hasOwnProperty('items') ?
+    const items$ = readingList.hasOwnProperty('items') ?
       of(readingList.items ?? []) :
       this.readingListService.getListItems(readingList.id);
 

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, signal, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewService} from "../../../_services/review.service";
@@ -28,7 +28,7 @@ interface RateAndReviewForm {
   templateUrl: './rate-and-review-series-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RateAndReviewSeriesModalComponent {
+export class RateAndReviewSeriesModalComponent implements OnInit {
 
   seriesId = input.required<number>();
   ratingReview = input.required<UserRatingAndReview>();

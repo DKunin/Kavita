@@ -242,7 +242,7 @@ export class StatisticsService {
       params = params.set('timeZoneId', filter.timezone);
     }
 
-    for (let library of filter.libraries) {
+    for (const library of filter.libraries) {
       params = params.append('libraries', library)
     }
 

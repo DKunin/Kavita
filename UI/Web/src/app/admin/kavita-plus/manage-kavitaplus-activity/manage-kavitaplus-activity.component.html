@@ -56,7 +56,7 @@
       </div>
       <div class="stat-value text-warning">{{stats()?.scrobbleQueueCount | defaultValue}}</div>
       @let nextScrobbleDate = nextScrobble();
-      @if (nextScrobbleDate != null) {
+      @if (nextScrobbleDate !== null && nextScrobbleDate !== undefined) {
         <div class="stat-subtitle">{{t('next-scrobble', {date: nextScrobbleDate | utcToLocalDate | timeDifference})}}</div>
       }
     </div>
@@ -130,7 +130,7 @@
       </select>
     </div>
 
-    <app-search-input [value]="searchQuery()" (search)="onSearchChange($event)" [label]="t('search-alt')" />
+    <app-search-input [value]="searchQuery()" (searchChange)="onSearchChange($event)" [label]="t('search-alt')" />
   </div>
 
   <ng-template #entryTpl let-entry>

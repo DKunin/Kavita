@@ -467,7 +467,7 @@ export class SearchTypeaheadComponent {
   }
 
   goTo(statement: FilterStatement<number>) {
-    let params: any = {};
+    const params: any = {};
     const filter = this.metadataService.createDefaultFilterDto('series');
     filter.statements = [statement];
     params['page'] = 1;
