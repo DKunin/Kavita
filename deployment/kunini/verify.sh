@@ -7,6 +7,7 @@ repo_dir="$(git -C "${app_dir}" rev-parse --show-toplevel)"
 expected_revision="$(git -C "${repo_dir}" rev-parse HEAD)"
 short_revision="$(git -C "${repo_dir}" rev-parse --short=12 HEAD)"
 expected_image="${KAVITA_IMAGE:-kavita-kunini:${short_revision}}"
+expected_ui_source="v0.9.1.4"
 password_file="/var/apps/kavita/secrets/admin-password"
 api_key_file="/var/apps/kavita/secrets/dkunin-kover-api-key"
 temporary_dir="$(mktemp -d)"
@@ -22,14 +23,22 @@ published_port="$(docker port kavita 5000/tcp)"
 books_mode="$(docker inspect kavita --format '{{range .Mounts}}{{if eq .Destination "/books"}}{{.Mode}}{{end}}{{end}}')"
 configured_image="$(docker inspect kavita --format '{{.Config.Image}}')"
 configured_revision="$(docker inspect kavita --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
+configured_ui_source="$(docker inspect kavita --format '{{index .Config.Labels "ru.kunini.kavita.ui-source"}}')"
 if [[ "${health}" != "healthy" || "${published_port}" != "127.0.0.1:5000" \
     || "${books_mode}" != "ro" || "${configured_image}" != "${expected_image}" ]]; then
     echo "Container health, listener, image, or media mount verification failed." >&2
     exit 1
 fi
-if [[ "${expected_image}" == kavita-kunini:* && "${configured_revision}" != "${expected_revision}" ]]; then
-    echo "The running UI image does not match the deployed Git revision." >&2
-    exit 1
+if [[ "${expected_image}" == kavita-kunini:* ]]; then
+    if [[ "${configured_revision}" != "${expected_revision}" || "${configured_ui_source}" != "${expected_ui_source}" ]]; then
+        echo "The running UI image does not match the deployed Git revision or compatible UI source." >&2
+        exit 1
+    fi
+    curl --fail --silent http://127.0.0.1:5000/assets/langs/en.json >"${temporary_dir}/en.json"
+    if ! jq -e '.dashboard["continue-reading-title"] == "Continue reading"' "${temporary_dir}/en.json" >/dev/null; then
+        echo "The deployed UI does not contain the Kunini home experience." >&2
+        exit 1
+    fi
 fi
 
 http_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \

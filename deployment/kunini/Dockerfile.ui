@@ -11,7 +11,10 @@ RUN npm run prod
 FROM jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
 
 ARG SOURCE_REVISION=unknown
-LABEL org.opencontainers.image.revision="${SOURCE_REVISION}"
+ARG UI_SOURCE_REF=unknown
+LABEL org.opencontainers.image.revision="${SOURCE_REVISION}" \
+      org.opencontainers.image.base.name="jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a" \
+      ru.kunini.kavita.ui-source="${UI_SOURCE_REF}"
 
 RUN rm -rf /kavita/wwwroot/*
 COPY --from=ui-build --chown=1000:1000 /src/dist/browser/ /kavita/wwwroot/

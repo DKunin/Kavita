@@ -1,0 +1,703 @@
+diff --git a/UI/Web/src/app/cards/entity-card/entity-card.component.scss b/UI/Web/src/app/cards/entity-card/entity-card.component.scss
+index 029765f5b..4e8204c2e 100644
+--- a/UI/Web/src/app/cards/entity-card/entity-card.component.scss
++++ b/UI/Web/src/app/cards/entity-card/entity-card.component.scss
+@@ -112,7 +112,7 @@
+     height: var(--card-image-height);
+     border-top-left-radius: 0.25rem;
+     border-top-right-radius: 0.25rem;
+-    transition: all 0.2s;
++    transition: background-color 150ms ease-out;
+   }
+ 
+   .overlay {
+@@ -216,7 +216,7 @@
+     height: var(--card-image-height);
+     border-top-left-radius: 0.25rem;
+     border-top-right-radius: 0.25rem;
+-    transition: all 0.2s;
++    transition: background-color 150ms ease-out;
+ 
+     .card-title {
+       padding: 0.625rem;
+@@ -373,4 +373,3 @@
+     color: var(--checkbox-bg-color);
+   }
+ }
+-
+diff --git a/UI/Web/src/app/carousel/_components/carousel-reel/carousel-reel.component.scss b/UI/Web/src/app/carousel/_components/carousel-reel/carousel-reel.component.scss
+index cb23c31d2..9b85edbc0 100644
+--- a/UI/Web/src/app/carousel/_components/carousel-reel/carousel-reel.component.scss
++++ b/UI/Web/src/app/carousel/_components/carousel-reel/carousel-reel.component.scss
+@@ -8,6 +8,15 @@
+     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 99%, transparent 100%);
+ }
+ 
++.carousel-btn {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  width: 2.75rem;
++  height: 2.75rem;
++  border-radius: 50%;
++}
++
+ .carousel-container {
+     .section-title {
+         font-weight: 400;
+@@ -31,7 +40,7 @@
+ 
+ ::ng-deep swiper-slide {
+   width: auto !important;
+-  margin: 0 .5rem;
++  margin: 0 0.55rem;
+ }
+ 
+ ::ng-deep swiper-container {
+diff --git a/UI/Web/src/app/dashboard/_components/dashboard.component.html b/UI/Web/src/app/dashboard/_components/dashboard.component.html
+index 92a0ae264..4f20cc051 100644
+--- a/UI/Web/src/app/dashboard/_components/dashboard.component.html
++++ b/UI/Web/src/app/dashboard/_components/dashboard.component.html
+@@ -73,63 +73,128 @@
+ 
+       <ng-template #onDeck let-stream: DashboardStream>
+         @if(stream.api | async; as data) {
+-          <app-carousel-reel
+-            [items]="data"
+-            [title]="t('on-deck-title')"
+-            [nextPageLoader]="onDeckNextPage(stream)"
+-            (sectionClick)="handleSectionClick(StreamId.OnDeck)"
+-          >
+-            <ng-template #carouselItem let-item>
+-              <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
+-                               (dataChanged)="reloadStream(stream.id, true)" />
+-            </ng-template>
+-          </app-carousel-reel>
++          <div class="dashboard-leading-grid">
++            @if (featuredOnDeck(); as featured) {
++              <section class="continue-reading" aria-labelledby="continue-reading-title">
++                <app-image
++                  class="feature-backdrop"
++                  [imageUrl]="imageService.getSeriesCoverImage(featured.data.id)"
++                  width="100%"
++                  height="100%"
++                  objectFit="cover"
++                />
++                <div class="feature-scrim" aria-hidden="true"></div>
++
++                <div class="feature-cover">
++                  <app-image
++                    [imageUrl]="imageService.getSeriesCoverImage(featured.data.id)"
++                    width="100%"
++                    height="100%"
++                    objectFit="cover"
++                  />
++                </div>
++
++                <div class="feature-content">
++                  <p class="feature-eyebrow" id="continue-reading-title">{{t('continue-reading-title')}}</p>
++                  <h1>{{featured.data.name}}</h1>
++                  <p class="feature-library">{{featured.data.libraryName}}</p>
++
++                  <div class="feature-progress-copy">
++                    <span>{{t('progress-label', {progress: progressPercent(featured.data)})}}</span>
++                    <span>{{featured.data.pagesRead}} / {{featured.data.pages}}</span>
++                  </div>
++                  <div
++                    class="feature-progress"
++                    role="progressbar"
++                    [attr.aria-label]="t('progress-label', {progress: progressPercent(featured.data)})"
++                    aria-valuemin="0"
++                    aria-valuemax="100"
++                    [attr.aria-valuenow]="progressPercent(featured.data)"
++                  >
++                    <span [style.width.%]="progressPercent(featured.data)"></span>
++                  </div>
++
++                  <div class="feature-actions">
++                    <button class="btn btn-primary" type="button" (click)="readFeaturedSeries(featured.data)">
++                      <i class="fa-solid fa-book-open" aria-hidden="true"></i>
++                      {{t('continue-reading-action')}}
++                    </button>
++                    <a class="btn btn-outline-secondary" [routerLink]="['/library', featured.data.libraryId, 'series', featured.data.id]">
++                      {{t('view-details')}}
++                      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
++                    </a>
++                  </div>
++                </div>
++              </section>
++            }
++
++            <div class="dashboard-stream on-deck-stream">
++              <app-carousel-reel
++                [items]="data"
++                [pageSize]="19"
++                [title]="t('on-deck-title')"
++                [nextPageLoader]="onDeckNextPage(stream)"
++                (sectionClick)="handleSectionClick(StreamId.OnDeck)"
++              >
++                <ng-template #carouselItem let-item>
++                  <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
++                                   (dataChanged)="reloadStream(stream.id, true)" />
++                </ng-template>
++              </app-carousel-reel>
++            </div>
++          </div>
+         }
+       </ng-template>
+ 
+       <ng-template #recentlyUpdated let-stream: DashboardStream>
+         @if(stream.api | async; as data) {
+-          <app-carousel-reel
+-            [items]="data"
+-            [title]="t('recently-updated-title')"
+-            [nextPageLoader]="onRecentlyUpdatedNextPage(stream)"
+-            (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
+-          >
+-            <ng-template #carouselItem let-item>
+-              <app-entity-card [entity]="item" [config]="recentlyUpdatedConfig()" />
+-            </ng-template>
+-          </app-carousel-reel>
++          <div class="dashboard-stream">
++            <app-carousel-reel
++              [items]="data"
++              [title]="t('recently-updated-title')"
++              [nextPageLoader]="onRecentlyUpdatedNextPage(stream)"
++              (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
++            >
++              <ng-template #carouselItem let-item>
++                <app-entity-card [entity]="item" [config]="recentlyUpdatedConfig()" />
++              </ng-template>
++            </app-carousel-reel>
++          </div>
+         }
+       </ng-template>
+ 
+       <ng-template #newlyUpdated let-stream: DashboardStream>
+         @if(stream.api | async; as data) {
+-          <app-carousel-reel
+-            [items]="data"
+-            [title]="t('recently-added-title')"
+-            [nextPageLoader]="onRecentlyAddedNextPage(stream)"
+-            (sectionClick)="handleSectionClick(StreamId.NewlyAddedSeries)"
+-          >
+-            <ng-template #carouselItem let-item>
+-              <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
+-                               (dataChanged)="reloadStream(stream.id)" />
+-            </ng-template>
+-          </app-carousel-reel>
++          <div class="dashboard-stream">
++            <app-carousel-reel
++              [items]="data"
++              [title]="t('recently-added-title')"
++              [nextPageLoader]="onRecentlyAddedNextPage(stream)"
++              (sectionClick)="handleSectionClick(StreamId.NewlyAddedSeries)"
++            >
++              <ng-template #carouselItem let-item>
++                <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
++                                 (dataChanged)="reloadStream(stream.id)" />
++              </ng-template>
++            </app-carousel-reel>
++          </div>
+         }
+       </ng-template>
+ 
+       <ng-template #moreInGenre let-stream: DashboardStream>
+         @if(stream.api | async; as data) {
+-          <app-carousel-reel
+-            [items]="data"
+-            [title]="t('more-in-genre-title', {genre: genre?.title})"
+-            (sectionClick)="handleSectionClick(StreamId.MoreInGenre)"
+-          >
+-            <ng-template #carouselItem let-item>
+-              <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
+-                               (dataChanged)="reloadStream(stream.id)" />
+-            </ng-template>
+-          </app-carousel-reel>
++          <div class="dashboard-stream">
++            <app-carousel-reel
++              [items]="data"
++              [title]="t('more-in-genre-title', {genre: genre?.title})"
++              (sectionClick)="handleSectionClick(StreamId.MoreInGenre)"
++            >
++              <ng-template #carouselItem let-item>
++                <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
++                                 (dataChanged)="reloadStream(stream.id)" />
++              </ng-template>
++            </app-carousel-reel>
++          </div>
+         }
+       </ng-template>
+     }
+@@ -137,4 +202,3 @@
+     <app-loading [loading]="isLoadingDashboard() || (streamCount !== streamsLoaded)" />
+   </ng-container>
+ </div>
+-
+diff --git a/UI/Web/src/app/dashboard/_components/dashboard.component.scss b/UI/Web/src/app/dashboard/_components/dashboard.component.scss
+index 74c4a03cc..e89c4a006 100644
+--- a/UI/Web/src/app/dashboard/_components/dashboard.component.scss
++++ b/UI/Web/src/app/dashboard/_components/dashboard.component.scss
+@@ -1,4 +1,306 @@
++@use '../../../theme/variables' as theme;
++
++:host {
++  --dashboard-surface: color-mix(in srgb, var(--card-bg-color) 88%, black);
++  --dashboard-border: rgb(255 255 255 / 9%);
++  --dashboard-muted: color-mix(in srgb, var(--body-text-color) 62%, transparent);
++}
++
+ .main-container {
+-    margin-top: 0.625rem;
+-    padding: 0 0 0 0.625rem;
+-}
+\ No newline at end of file
++  margin-top: 0.75rem;
++  padding: 0 1rem 2rem;
++}
++
++.dashboard-leading-grid {
++  display: grid;
++  grid-template-columns: minmax(30rem, 1.15fr) minmax(26rem, 0.85fr);
++  gap: 1.5rem;
++  align-items: start;
++  margin-bottom: 1.75rem;
++}
++
++.continue-reading {
++  position: relative;
++  display: grid;
++  grid-template-columns: 10rem minmax(0, 1fr);
++  gap: 1.25rem;
++  min-height: 17.25rem;
++  padding: 1rem;
++  overflow: hidden;
++  background: var(--dashboard-surface);
++  border: 0.0625rem solid var(--dashboard-border);
++  border-radius: 0.75rem;
++  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 18%), 0 0.125rem 0.5rem rgb(0 0 0 / 18%);
++}
++
++.feature-backdrop,
++.feature-scrim {
++  position: absolute;
++  inset: 0;
++}
++
++.feature-backdrop {
++  opacity: 0.16;
++  filter: blur(2.25rem) saturate(0.8);
++  transform: scale(1.18);
++  pointer-events: none;
++}
++
++.feature-scrim {
++  background: rgb(20 23 21 / 78%);
++  pointer-events: none;
++}
++
++.feature-cover,
++.feature-content {
++  position: relative;
++  z-index: 1;
++}
++
++.feature-cover {
++  width: 10rem;
++  aspect-ratio: 0.6875;
++  overflow: hidden;
++  border-radius: 0.5rem;
++  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 32%);
++}
++
++:host ::ng-deep .feature-cover img {
++  border-radius: inherit;
++  outline: 0.0625rem solid rgb(255 255 255 / 12%);
++  outline-offset: -0.0625rem;
++}
++
++.feature-content {
++  display: flex;
++  flex-direction: column;
++  min-width: 0;
++  padding: 0.25rem 0;
++}
++
++.feature-eyebrow {
++  margin: 0 0 0.35rem;
++  color: var(--primary-color);
++  font-size: 0.75rem;
++  font-weight: 600;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++
++.feature-content h1 {
++  margin: 0;
++  font-family: "EBGarmond", Georgia, serif;
++  font-size: clamp(2rem, 3vw, 2.75rem);
++  font-weight: 500;
++  line-height: 1.05;
++  text-wrap: balance;
++}
++
++.feature-library {
++  margin: 0.4rem 0 auto;
++  color: var(--dashboard-muted);
++  font-size: 0.9rem;
++  text-wrap: pretty;
++}
++
++.feature-progress-copy {
++  display: flex;
++  justify-content: space-between;
++  gap: 1rem;
++  margin: 1rem 0 0.45rem;
++  color: var(--dashboard-muted);
++  font-size: 0.8rem;
++  font-variant-numeric: tabular-nums;
++}
++
++.feature-progress {
++  height: 0.35rem;
++  overflow: hidden;
++  background: rgb(255 255 255 / 14%);
++  border-radius: 999px;
++}
++
++.feature-progress span {
++  display: block;
++  height: 100%;
++  background: var(--primary-color);
++  border-radius: inherit;
++}
++
++.feature-actions {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 0.75rem;
++  margin-top: 1rem;
++}
++
++.feature-actions .btn {
++  display: inline-flex;
++  gap: 0.55rem;
++  align-items: center;
++  justify-content: center;
++  min-height: 2.75rem;
++  padding-inline: 1rem;
++  border-radius: 0.5rem;
++  transition-property: transform, background-color, border-color, box-shadow;
++  transition-duration: 150ms;
++  transition-timing-function: ease-out;
++}
++
++.feature-actions .btn:active {
++  transform: scale(0.98);
++}
++
++.on-deck-stream {
++  min-width: 0;
++  padding-top: 0.25rem;
++}
++
++:host ::ng-deep app-carousel-reel {
++  .carousel-container {
++    margin-bottom: 1.75rem !important;
++  }
++
++  .header {
++    margin-bottom: 0.65rem;
++    font-family: "EBGarmond", Georgia, serif;
++    font-size: 1.75rem;
++    font-weight: 500;
++    line-height: 1.2;
++    text-wrap: balance;
++  }
++
++  .section-title {
++    margin-left: 0;
++    color: var(--body-text-color);
++  }
++}
++
++:host ::ng-deep .dashboard-stream app-entity-card {
++  .card-item-container > .card {
++    overflow: hidden;
++    border: 0.0625rem solid var(--dashboard-border);
++    border-radius: 0.625rem;
++    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 16%);
++    transition-property: transform, border-color, box-shadow;
++    transition-duration: 150ms;
++    transition-timing-function: ease-out;
++  }
++
++  .card-item-container > .card:hover,
++  .card-item-container > .card:focus-within {
++    border-color: rgb(74 198 148 / 48%);
++    box-shadow: 0 0.75rem 1.75rem rgb(0 0 0 / 28%);
++    transform: translateY(-0.125rem);
++  }
++
++  .overlay,
++  .card-overlay,
++  app-image img {
++    border-top-left-radius: 0.5625rem !important;
++    border-top-right-radius: 0.5625rem !important;
++  }
++
++  app-image img {
++    outline: 0.0625rem solid rgb(255 255 255 / 10%);
++    outline-offset: -0.0625rem;
++  }
++
++  .card-title-container {
++    min-height: 3.4rem;
++    padding: 0.35rem 0.25rem 0.4rem 0.4rem;
++    background: color-mix(in srgb, var(--card-bg-color) 92%, black);
++  }
++
++  .card-title-container .card-title {
++    padding: 0.3rem 0.2rem;
++    text-align: left;
++  }
++
++  .card-title-container .card-title a {
++    display: -webkit-box;
++    min-height: 2.1rem;
++    overflow: hidden;
++    -webkit-box-orient: vertical;
++    -webkit-line-clamp: 2;
++    line-height: 1.05rem;
++    text-overflow: ellipsis;
++    white-space: normal;
++    text-wrap: pretty;
++  }
++}
++
++@media (max-width: 75rem) {
++  .dashboard-leading-grid {
++    grid-template-columns: 1fr;
++  }
++
++  .on-deck-stream {
++    padding-top: 0;
++  }
++}
++
++@media (max-width: theme.$grid-breakpoints-md) {
++  .main-container {
++    padding: 0 0.75rem 1.5rem;
++  }
++
++  .dashboard-leading-grid {
++    gap: 1rem;
++    margin-bottom: 1.25rem;
++  }
++
++  .continue-reading {
++    grid-template-columns: 7rem minmax(0, 1fr);
++    gap: 0.9rem;
++    min-height: 12rem;
++    padding: 0.75rem;
++    border-radius: 0.625rem;
++  }
++
++  .feature-cover {
++    width: 7rem;
++    border-radius: 0.4rem;
++  }
++
++  .feature-content h1 {
++    font-size: clamp(1.6rem, 7vw, 2rem);
++  }
++
++  .feature-library {
++    margin-bottom: 0.25rem;
++  }
++
++  .feature-progress-copy {
++    margin-top: 0.5rem;
++  }
++
++  .feature-actions {
++    gap: 0.5rem;
++    margin-top: 0.75rem;
++  }
++
++  .feature-actions .btn {
++    min-height: 2.5rem;
++    padding-inline: 0.75rem;
++    font-size: 0.8rem;
++  }
++
++  :host ::ng-deep app-carousel-reel .header {
++    font-size: 1.55rem;
++  }
++}
++
++@media (max-width: 25rem) {
++  .continue-reading {
++    grid-template-columns: 5.5rem minmax(0, 1fr);
++  }
++
++  .feature-cover {
++    width: 5.5rem;
++  }
++
++  .feature-actions .btn-outline-secondary {
++    display: none;
++  }
++}
+diff --git a/UI/Web/src/app/dashboard/_components/dashboard.component.ts b/UI/Web/src/app/dashboard/_components/dashboard.component.ts
+index e57614654..5c05c4e13 100644
+--- a/UI/Web/src/app/dashboard/_components/dashboard.component.ts
++++ b/UI/Web/src/app/dashboard/_components/dashboard.component.ts
+@@ -36,7 +36,7 @@ import {QueryContext} from "../../_models/metadata/v2/query-context";
+ import {LicenseService} from "../../_services/license.service";
+ import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
+ import {CardConfigFactory} from "../../_services/card-config-factory.service";
+-import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
++import {CardEntity, CardEntityFactory, SeriesCardEntity} from "../../_models/card/card-entity";
+ import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
+ import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
+ import {ReadingListService} from "../../_services/reading-list.service";
+@@ -52,6 +52,8 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+ import {RecentlyAddedItem} from "../../_models/recently-added-item";
+ import {SeriesSortField} from "../../_models/metadata/series-filter";
+ import {Library} from "../../_models/library/library";
++import {ImageComponent} from "../../shared/image/image.component";
++import {Series} from "../../_models/series";
+ 
+ enum StreamId {
+   OnDeck,
+@@ -67,7 +69,7 @@ enum StreamId {
+   styleUrls: ['./dashboard.component.scss'],
+   changeDetection: ChangeDetectionStrategy.OnPush,
+   imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, AsyncPipe, TranslocoDirective,
+-    NgTemplateOutlet, LoadingComponent, EntityCardComponent, PromotedIconComponent]
++    NgTemplateOutlet, LoadingComponent, EntityCardComponent, PromotedIconComponent, ImageComponent]
+ })
+ export class DashboardComponent {
+ 
+@@ -96,6 +98,7 @@ export class DashboardComponent {
+ 
+   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
+   isLoadingDashboard = signal<boolean>(true);
++  featuredOnDeck = signal<SeriesCardEntity | null>(null);
+ 
+   streams: Array<DashboardStream> = [];
+   genre: Genre | undefined;
+@@ -172,8 +175,8 @@ export class DashboardComponent {
+   }
+ 
+   onDeckNextPage(stream: DashboardStream) {
+-    return (pageNum: number, pageSize: number) => {
+-      return this.seriesService.getOnDeck(pageNum, pageSize)
++    return (pageNum: number, _pageSize: number) => {
++      return this.seriesService.getOnDeck(pageNum, 20)
+         .pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
+     }
+   }
+@@ -195,6 +198,7 @@ export class DashboardComponent {
+     this.isLoadingDashboard.set(true);
+     this.streamsLoaded = 0;
+     this.streamCount = 0;
++    this.featuredOnDeck.set(null);
+     this.cdRef.markForCheck();
+ 
+     this.dashboardService.getDashboardStreams().subscribe(streams => {
+@@ -206,6 +210,13 @@ export class DashboardComponent {
+             s.api = this.seriesService.getOnDeck(1, 20)
+                 .pipe(
+                   map(d => d.result.map(series => CardEntityFactory.series(series, { isOnDeck: true }))),
++                  map(items => {
++                    const featured = this.selectFeaturedOnDeck(items);
++                    this.featuredOnDeck.set(featured);
++                    return featured === null
++                      ? items
++                      : items.filter(item => item.data.id !== featured.data.id);
++                  }),
+                   tap(() => this.increment()),
+                   takeUntilDestroyed(this.destroyRef),
+                   shareReplay({bufferSize: 1, refCount: true})
+@@ -275,6 +286,25 @@ export class DashboardComponent {
+     this.cdRef.markForCheck();
+   }
+ 
++  selectFeaturedOnDeck(items: SeriesCardEntity[]): SeriesCardEntity | null {
++    if (items.length === 0) return null;
++
++    const activeItems = items
++      .filter(item => item.data.pagesRead > 0 && item.data.pagesRead < item.data.pages)
++      .sort((a, b) => Date.parse(b.data.latestReadDate) - Date.parse(a.data.latestReadDate));
++
++    return activeItems[0] ?? items[0];
++  }
++
++  progressPercent(series: Series): number {
++    if (series.pages <= 0) return 0;
++    return Math.round((series.pagesRead / series.pages) * 100);
++  }
++
++  readFeaturedSeries(series: Series) {
++    this.readerService.readSeries(series, false);
++  }
++
+   reloadStream(streamId: number, onDeck = false) {
+     const index = this.streams.findIndex(s => s.id === streamId);
+     if (index < 0) return;
+diff --git a/UI/Web/src/assets/langs/en.json b/UI/Web/src/assets/langs/en.json
+index 9183ff8db..91a5de5e6 100644
+--- a/UI/Web/src/assets/langs/en.json
++++ b/UI/Web/src/assets/langs/en.json
+@@ -139,6 +139,10 @@
+         "no-libraries": "There are no libraries setup yet. Create some in",
+         "server-settings-link": "Server settings",
+         "not-granted": "You haven't been granted access to any libraries.",
++        "continue-reading-title": "Continue reading",
++        "continue-reading-action": "Continue reading",
++        "progress-label": "{{progress}}% complete",
++        "view-details": "View details",
+         "on-deck-title": "On Deck",
+         "recently-updated-title": "Recently Updated Series",
+         "recently-added-title": "Newly Added Series",
+diff --git a/UI/Web/src/theme/themes/dark.scss b/UI/Web/src/theme/themes/dark.scss
+index 86b81ad7d..932bccba1 100644
+--- a/UI/Web/src/theme/themes/dark.scss
++++ b/UI/Web/src/theme/themes/dark.scss
+@@ -119,7 +119,7 @@
+   --table-body-striped-bg-color: var(--elevation-layer2);
+ 
+   /* Navbar */
+-  --navbar-bg-color: black;
++  --navbar-bg-color: #111312;
+   --navbar-text-color: white;
+   --navbar-fa-icon-color: white;
+   --navbar-border-radius: 0; // 4px for Plex navbar
+@@ -278,13 +278,13 @@
+   /* Side Nav */
+   --side-nav-width: 14.375rem;
+   --side-nav-icon-size: 0.9rem;
+-  --side-nav-bg-color: var(--elevation-layer9-dark);
++  --side-nav-bg-color: #1b1e1c;
+   --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
+   --side-nav-openclose-transition: 0.15s ease-in-out;
+   --side-nav-box-shadow: var(--elevation-layer0);
+   --side-nav-mobile-box-shadow: 0.1875rem 0em 0.3125rem 10em rgb(0 0 0 / 50%);
+   --side-nav-hover-text-color: white;
+-  --side-nav-hover-bg-color: black;
++  --side-nav-hover-bg-color: rgb(255 255 255 / 6%);
+   --side-nav-text-color: hsla(0, 0%, 100%, .85);
+   --side-nav-header-text-color: white;
+   --side-nav-border-radius: 0.1875rem;
+@@ -296,7 +296,7 @@
+   --side-nav-closed-bg-color: transparent;
+   --side-nav-item-active-color: var(--primary-color);
+   --side-nav-item-active-text-color: #fff;
+-  --side-nav-active-bg-color: transparent;
++  --side-nav-active-bg-color: color-mix(in srgb, var(--primary-color) 13%, transparent);
+   --side-nav-overlay-color: var(--elevation-layer11-dark);
+   --side-nav-item-color: rgb(255 255 255 / 9%);
+   --side-nav-item-closed-color: var(--elevation-layer10);
+

@@ -15,8 +15,11 @@ Bookmark; `dkunin` сохраняет Admin. Парольный вход Kavita 
 
 ## Деплой
 
-UI собирается локально поверх того же pinned runtime-образа Kavita. Тег образа
-содержит сокращённый Git SHA, а полный SHA записывается в OCI label:
+UI собирается локально из совместимого с runtime тега `v0.9.1.4`: поверх него
+автоматически накладывается `ui-v0.9.1.4.patch`. Это не даёт более новому
+frontend вызвать API, которого ещё нет в pinned backend. Итоговый образ строится
+поверх того же runtime Kavita. Тег образа содержит сокращённый Git SHA, а полный
+SHA и версия UI-источника записываются в OCI labels:
 
 ```bash
 ./deployment/kunini/build-ui-image.sh
