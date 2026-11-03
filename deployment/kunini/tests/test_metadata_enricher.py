@@ -3,9 +3,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sqlite3
+import subprocess
 import sys
 import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -134,6 +137,20 @@ class OpenLibraryTests(unittest.TestCase):
         self.assertEqual("isbn_title_mismatch", proposal.match_kind)
         self.assertFalse(proposal.auto_eligible)
 
+    def test_isbn_not_found_falls_back_without_provider_error(self):
+        provider = self.provider()
+        provider.http = mock.Mock()
+        provider.http.get.side_effect = enricher.HttpStatusError(404, "openlibrary.org")
+        provider._lookup_title = mock.Mock(return_value=None)
+        self.assertIsNone(provider.lookup(target(isbns=("9780000000001",))))
+
+    def test_isbn_provider_failure_is_not_hidden(self):
+        provider = self.provider()
+        provider.http = mock.Mock()
+        provider.http.get.side_effect = enricher.HttpStatusError(503, "openlibrary.org")
+        with self.assertRaisesRegex(enricher.HttpStatusError, "HTTP 503"):
+            provider.lookup(target(isbns=("9780000000001",)))
+
 
 class WikipediaTests(unittest.TestCase):
     def test_exact_page_title_and_author_is_review_only(self):
@@ -160,6 +177,10 @@ class WikipediaTests(unittest.TestCase):
 
 
 class SafetyTests(unittest.TestCase):
+    def test_audit_rejects_non_positive_cache_ttl(self):
+        with self.assertRaisesRegex(enricher.EnricherError, "at least one day"):
+            enricher.generate_report(argparse.Namespace(cache_ttl_days=0))
+
     def test_verified_backup_passes_quick_check(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -340,6 +361,111 @@ class SafetyTests(unittest.TestCase):
             inventory = enricher.disk_inventory(root)
             self.assertEqual({"epub": 1, "cbr": 1}, inventory["counts"])
             self.assertEqual(["Comic.CBR"], inventory["archivePaths"])
+
+
+class DailyAutomationTests(unittest.TestCase):
+    wrapper = Path(__file__).resolve().parents[1] / "metadata-enricher-daily.sh"
+
+    def run_daily(self, root: Path, *, approved: int, provider_errors: int):
+        fake_enricher = root / "fake_enricher.py"
+        fake_enricher.write_text(
+            textwrap.dedent(
+                """
+                import json
+                import os
+                import sys
+                from pathlib import Path
+
+                def option(name):
+                    return sys.argv[sys.argv.index(name) + 1]
+
+                if sys.argv[1] == "audit":
+                    report = {
+                        "providerErrors": ["failed"] * int(os.environ["FAKE_PROVIDER_ERRORS"]),
+                        "stats": {"autoApproved": int(os.environ["FAKE_APPROVED"])},
+                    }
+                    output = Path(option("--output"))
+                    output.write_text(json.dumps(report), encoding="utf-8")
+                    print(json.dumps({"report": str(output)}))
+                elif sys.argv[1] == "apply":
+                    report = json.loads(Path(option("--report")).read_text(encoding="utf-8"))
+                    count = report["stats"]["autoApproved"]
+                    journal = {
+                        "schemaVersion": 1,
+                        "status": "complete",
+                        "items": [{"status": "applied"}] * count,
+                    }
+                    Path(option("--journal")).write_text(json.dumps(journal), encoding="utf-8")
+                    Path(os.environ["FAKE_APPLY_MARKER"]).write_text("applied", encoding="utf-8")
+                    print(json.dumps({"applied": count}))
+                else:
+                    raise SystemExit(2)
+                """
+            ).lstrip(),
+            encoding="utf-8",
+        )
+        api_key = root / "api-key"
+        database = root / "kavita.db"
+        library = root / "library"
+        state = root / "state"
+        marker = root / "apply-marker"
+        api_key.write_text("secret\n", encoding="utf-8")
+        database.touch()
+        library.mkdir()
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "FAKE_APPROVED": str(approved),
+                "FAKE_PROVIDER_ERRORS": str(provider_errors),
+                "FAKE_APPLY_MARKER": str(marker),
+                "KAVITA_METADATA_PYTHON": sys.executable,
+                "KAVITA_METADATA_FLOCK": "/usr/bin/true",
+                "KAVITA_METADATA_ENRICHER": str(fake_enricher),
+                "KAVITA_METADATA_STATE_DIR": str(state),
+                "KAVITA_METADATA_API_KEY_FILE": str(api_key),
+                "KAVITA_METADATA_DATABASE_PATH": str(database),
+                "KAVITA_METADATA_LIBRARY_ROOT": str(library),
+                "KAVITA_METADATA_KAVITA_URL": "https://example.test",
+            }
+        )
+        result = subprocess.run(
+            ["/bin/bash", str(self.wrapper)],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env=environment,
+        )
+        return result, state, marker
+
+    def test_no_candidates_is_successful_no_op(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, state, marker = self.run_daily(
+                Path(temporary), approved=0, provider_errors=0
+            )
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertFalse(marker.exists())
+            self.assertIn("outcome=no-op", (state / "daily.log").read_text())
+            self.assertEqual(0o600, (state / "daily.log").stat().st_mode & 0o777)
+
+    def test_provider_error_blocks_apply(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, state, marker = self.run_daily(
+                Path(temporary), approved=1, provider_errors=1
+            )
+            self.assertEqual(1, result.returncode)
+            self.assertFalse(marker.exists())
+            self.assertIn("outcome=blocked", (state / "daily.log").read_text())
+
+    def test_candidates_are_applied_and_verified(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, state, marker = self.run_daily(
+                Path(temporary), approved=2, provider_errors=0
+            )
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertTrue(marker.exists())
+            self.assertIn("outcome=complete applied=2", (state / "daily.log").read_text())
+            self.assertTrue((state / "latest-journal.json").resolve().is_file())
 
 
 if __name__ == "__main__":

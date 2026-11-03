@@ -46,6 +46,14 @@ class EnricherError(RuntimeError):
     """An expected, operator-actionable failure."""
 
 
+class HttpStatusError(EnricherError):
+    """An HTTP response that callers may handle by status code."""
+
+    def __init__(self, status_code: int, host: str) -> None:
+        self.status_code = status_code
+        super().__init__(f"HTTP {status_code} from {host}")
+
+
 class _TextExtractor(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -292,8 +300,8 @@ class JsonHttpClient:
             except urllib.error.HTTPError as error:
                 retryable = error.code == 429 or 500 <= error.code < 600
                 if not retryable or attempt == 2:
-                    raise EnricherError(
-                        f"HTTP {error.code} from {urllib.parse.urlsplit(url).netloc}"
+                    raise HttpStatusError(
+                        error.code, urllib.parse.urlsplit(url).netloc
                     ) from error
                 retry_after = error.headers.get("Retry-After")
                 delay = min(float(retry_after), 60.0) if retry_after else 2**attempt
@@ -367,10 +375,13 @@ class KavitaClient:
 
 
 class OpenLibraryProvider:
-    def __init__(self, cache_dir: Path, contact: str) -> None:
+    def __init__(
+        self, cache_dir: Path, contact: str, cache_ttl_days: int = 90
+    ) -> None:
         self.http = JsonHttpClient(
             f"{USER_AGENT_NAME} ({contact})",
             cache_dir=cache_dir,
+            cache_ttl_days=cache_ttl_days,
             minimum_interval=1.05,
         )
         self._author_results: dict[str, list[dict[str, Any]]] = {}
@@ -386,8 +397,10 @@ class OpenLibraryProvider:
         url = f"https://openlibrary.org/isbn/{urllib.parse.quote(isbn)}.json"
         try:
             edition = self.http.get(url, cache_namespace="openlibrary")
-        except EnricherError:
-            return None
+        except HttpStatusError as error:
+            if error.status_code == 404:
+                return None
+            raise
         if not isinstance(edition, dict):
             return None
         text = plain_text(edition.get("description"))
@@ -498,17 +511,25 @@ class OpenLibraryProvider:
         return self._author_results[cache_key]
 
     def _work(self, key: str) -> dict[str, Any] | None:
-        value = self.http.get(
-            f"https://openlibrary.org{key}.json", cache_namespace="openlibrary"
-        )
+        try:
+            value = self.http.get(
+                f"https://openlibrary.org{key}.json", cache_namespace="openlibrary"
+            )
+        except HttpStatusError as error:
+            if error.status_code == 404:
+                return None
+            raise
         return value if isinstance(value, dict) else None
 
 
 class WikipediaProvider:
-    def __init__(self, cache_dir: Path, contact: str) -> None:
+    def __init__(
+        self, cache_dir: Path, contact: str, cache_ttl_days: int = 90
+    ) -> None:
         self.http = JsonHttpClient(
             f"{USER_AGENT_NAME} ({contact})",
             cache_dir=cache_dir,
+            cache_ttl_days=cache_ttl_days,
             minimum_interval=0.2,
         )
 
@@ -560,10 +581,17 @@ class WikipediaProvider:
 
 
 class MetronProvider:
-    def __init__(self, cache_dir: Path, contact: str, token: str) -> None:
+    def __init__(
+        self,
+        cache_dir: Path,
+        contact: str,
+        token: str,
+        cache_ttl_days: int = 90,
+    ) -> None:
         self.http = JsonHttpClient(
             f"{USER_AGENT_NAME} ({contact})",
             cache_dir=cache_dir,
+            cache_ttl_days=cache_ttl_days,
             minimum_interval=0.5,
         )
         self.headers = {"Authorization": f"Bearer {token}"}
@@ -736,17 +764,28 @@ def disk_inventory(root: Path | None) -> dict[str, Any] | None:
 
 
 def generate_report(args: argparse.Namespace) -> dict[str, Any]:
+    if args.cache_ttl_days < 1:
+        raise EnricherError("Cache TTL must be at least one day")
     kavita = KavitaClient(args.kavita_url, read_secret(args.api_key_file))
     targets, inventory_stats = collect_targets(kavita, workers=args.workers)
     if args.limit:
         targets = targets[: args.limit]
 
-    open_library = OpenLibraryProvider(args.cache_dir, args.contact)
-    wikipedia = None if args.skip_wikipedia else WikipediaProvider(args.cache_dir, args.contact)
+    open_library = OpenLibraryProvider(
+        args.cache_dir, args.contact, args.cache_ttl_days
+    )
+    wikipedia = (
+        None
+        if args.skip_wikipedia
+        else WikipediaProvider(args.cache_dir, args.contact, args.cache_ttl_days)
+    )
     metron = None
     if args.metron_token_file:
         metron = MetronProvider(
-            args.cache_dir, args.contact, read_secret(args.metron_token_file)
+            args.cache_dir,
+            args.contact,
+            read_secret(args.metron_token_file),
+            args.cache_ttl_days,
         )
 
     items: list[dict[str, Any]] = []
@@ -1009,6 +1048,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_kavita_options(audit)
     audit.add_argument("--output", type=Path, required=True)
     audit.add_argument("--cache-dir", type=Path, required=True)
+    audit.add_argument("--cache-ttl-days", type=int, default=90)
     audit.add_argument("--contact", default="https://books.kunini.ru")
     audit.add_argument("--metron-token-file", type=Path)
     audit.add_argument("--library-root", type=Path)
