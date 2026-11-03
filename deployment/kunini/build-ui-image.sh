@@ -8,6 +8,7 @@ short_revision="$(git -C "${repo_dir}" rev-parse --short=12 HEAD)"
 image="${KAVITA_IMAGE:-kavita-kunini:${short_revision}}"
 ui_source_ref="v0.9.1.4"
 ui_patch="${app_dir}/ui-v0.9.1.4.patch"
+ink_patch="${app_dir}/ui-ink-v0.9.1.4.patch"
 mkdir -p "${repo_dir}/tmp"
 build_root="$(mktemp -d "${repo_dir}/tmp/kavita-ui-build.XXXXXX")"
 archive_path="${build_root}/source.tar"
@@ -23,6 +24,8 @@ tar -xf "${archive_path}" -C "${build_root}"
 rm "${archive_path}"
 git -C "${repo_dir}" apply --directory="${relative_build_root}" --check "${ui_patch}"
 git -C "${repo_dir}" apply --directory="${relative_build_root}" "${ui_patch}"
+git -C "${repo_dir}" apply --unidiff-zero --directory="${relative_build_root}" --check "${ink_patch}"
+git -C "${repo_dir}" apply --unidiff-zero --directory="${relative_build_root}" "${ink_patch}"
 
 docker build \
     --platform linux/amd64 \

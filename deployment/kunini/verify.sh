@@ -35,8 +35,9 @@ if [[ "${expected_image}" == kavita-kunini:* ]]; then
         exit 1
     fi
     curl --fail --silent http://127.0.0.1:5000/assets/langs/en.json >"${temporary_dir}/en.json"
-    if ! jq -e '.dashboard["continue-reading-title"] == "Continue reading"' "${temporary_dir}/en.json" >/dev/null; then
-        echo "The deployed UI does not contain the Kunini home experience." >&2
+    if ! jq -e '.dashboard["continue-reading-title"] == "Continue reading"
+        and .["ink-library"].title == "Library"' "${temporary_dir}/en.json" >/dev/null; then
+        echo "The deployed UI does not contain the Kunini Ink experience." >&2
         exit 1
     fi
 fi

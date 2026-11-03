@@ -1,0 +1,913 @@
+diff --git a/UI/Web/src/styles.scss b/UI/Web/src/styles.scss
+index fc81d1894..50ae95b69 100644
+--- a/UI/Web/src/styles.scss
++++ b/UI/Web/src/styles.scss
+@@ -114 +114,3 @@ body {
+-  font-family: 'Poppins', sans-serif;
++  font-family: var(--body-font-family);
++  color: var(--ink-text);
++  background: var(--ink-background);
+@@ -128,0 +131,11 @@ body {
++:where(a, button, input, select, textarea, [tabindex]):focus-visible {
++  outline: 0.125rem solid var(--ink-accent) !important;
++  outline-offset: 0.125rem;
++  box-shadow: none !important;
++}
++
++::selection {
++  color: var(--ink-text);
++  background: var(--ink-selection);
++}
++
+@@ -163,0 +177,90 @@ body {
++
++.ink-series-preview {
++  --bs-offcanvas-width: 20rem;
++  border-left: 0.0625rem solid var(--ink-border) !important;
++
++  @media (max-width: 48rem) {
++    --bs-offcanvas-width: 100vw;
++  }
++}
++
++app-card-detail-layout .grid.list-layout {
++  display: flex;
++  flex-direction: column;
++  gap: 0;
++
++  .card-detail-layout-item {
++    width: 100%;
++    margin: 0 !important;
++    border-bottom: 0.0625rem solid var(--ink-border);
++  }
++
++  app-entity-card .card-item-container {
++    display: grid;
++    grid-template-columns: 3.5rem minmax(0, 1fr);
++    grid-template-rows: auto 1fr;
++    width: 100%;
++    min-height: 5.25rem;
++    padding: 0.625rem 0;
++    background: transparent;
++    border: 0;
++    border-radius: 0;
++
++    > .overlay {
++      grid-row: 1 / 3;
++      width: 3.5rem;
++      height: 4.25rem;
++      overflow: hidden;
++      border-radius: var(--ink-radius-sm);
++
++      app-image,
++      .card-overlay,
++      .overlay-information {
++        width: 3.5rem !important;
++        height: 4.25rem !important;
++      }
++    }
++
++    > .meta-title {
++      display: block;
++      grid-column: 2;
++      min-height: 0;
++      padding: 0.125rem 0.75rem;
++      color: var(--ink-text-secondary);
++      background: transparent;
++
++      .card-content {
++        justify-content: flex-start !important;
++        min-height: 0 !important;
++        text-align: left !important;
++      }
++    }
++
++    > .card-title-container {
++      grid-column: 2;
++      grid-row: 1;
++      min-height: 2.25rem;
++      padding: 0 0 0 0.75rem;
++
++      .card-title {
++        font-size: 0.9375rem;
++        font-weight: 600;
++        text-align: left;
++      }
++    }
++  }
++}
++
++@media (max-width: 576px) {
++  app-card-detail-layout .grid:not(.list-layout) app-entity-card .card-item-container {
++    width: 100%;
++
++    > .overlay,
++    > .overlay app-image,
++    > .overlay .card-overlay,
++    > .overlay .overlay-information {
++      width: 100% !important;
++      height: calc((100vw - 2.5rem) * 0.73) !important;
++    }
++  }
++}
+diff --git a/UI/Web/src/app/app.component.scss b/UI/Web/src/app/app.component.scss
+index d34af3501..c70a5dba8 100644
+--- a/UI/Web/src/app/app.component.scss
++++ b/UI/Web/src/app/app.component.scss
+@@ -4 +4 @@
+-    padding: 0 0 0 0.625rem;
++    padding: 0;
+@@ -10 +10 @@
+-    margin-left: 2.8125rem;
++    margin-left: 3.125rem;
+@@ -99,13 +99 @@
+-  background: radial-gradient(circle farthest-side at 0% 100%,
+-    var(--colorscape-darker-color) 0%,
+-    var(--colorscape-darker-no-alpha-color) 100%),
+-              radial-gradient(circle farthest-side at 100% 100%,
+-      var(--colorscape-primary-color) 0%,
+-      var(--colorscape-primary-no-alpha-color) 100%),
+-              radial-gradient(circle farthest-side at 100% 0%,
+-      var(--colorscape-lighter-color) 0%,
+-      var(--colorscape-lighter-no-alpha-color) 100%),
+-              radial-gradient(circle farthest-side at 0% 0%,
+-      var(--colorscape-complementary-color) 0%,
+-      var(--colorscape-complementary-no-alpha-color) 100%),
+-    var(--bs-body-bg);
++  background: var(--ink-background);
+@@ -122,5 +110 @@
+-  background-color: var(--bs-body-bg);
+-  filter: blur(1.25rem);
+-  object-fit: contain;
+-  transform: scale(1.1);
+-  mix-blend-mode: color;
++  background-color: var(--ink-background);
+diff --git a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.html b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.html
+index b8f51519d..b2b6e574d 100644
+--- a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.html
++++ b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.html
+@@ -5,2 +5,2 @@
+-    [minWidth]="breakpointService.isTabletOrBelow() ? 200 : 300"
+-    [maxWidth]="breakpointService.isTabletOrBelow() ? window.innerWidth : window.innerWidth*0.5"
++    [minWidth]="breakpointService.isTabletOrBelow() ? window.innerWidth : 320"
++    [maxWidth]="breakpointService.isTabletOrBelow() ? window.innerWidth : 400"
+@@ -10,3 +10 @@
+-    <h5 class="offcanvas-title">
+-      {{name()}}
+-    </h5>
++    <h5 class="offcanvas-title">{{t('ink-library.details')}}</h5>
+@@ -17,5 +15,17 @@
+-    <div style="width: 10rem" class="mx-auto mb-3">
+-      @let cover = coverUrl();
+-      @if (cover) {
+-        <app-image height="232.91px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '232.91px'}" [imageUrl]="cover" />
+-      }
++    <div class="ink-preview-hero">
++      <div class="ink-preview-cover">
++        @let cover = coverUrl();
++        @if (cover) {
++          <app-image height="189px" width="128px" [styles]="{'object-fit': 'contain', 'max-height': '189px'}" [imageUrl]="cover" />
++        }
++      </div>
++
++      <div class="ink-preview-heading">
++        <h2>{{name()}}</h2>
++        @if (localStaff()[0]; as primaryAuthor) {
++          <p>{{primaryAuthor.name}}</p>
++        }
++        @if (series(); as selectedSeries) {
++          <span class="ink-format">{{selectedSeries.format | mangaFormat}}</span>
++        }
++      </div>
+@@ -23,0 +34,18 @@
++    @if (series(); as selectedSeries) {
++      <div class="ink-progress-block">
++        <div class="ink-progress-label">
++          <span>{{t('ink-library.progress', {progress: progressPercent()})}}</span>
++          <span>{{selectedSeries.pagesRead}} / {{selectedSeries.pages}}</span>
++        </div>
++        <div class="ink-progress-track" role="progressbar" [attr.aria-label]="t('ink-library.progress', {progress: progressPercent()})"
++             [attr.aria-valuenow]="progressPercent()" aria-valuemin="0" aria-valuemax="100">
++          <span [style.width.%]="progressPercent()"></span>
++        </div>
++      </div>
++
++      <button type="button" class="btn btn-primary ink-read-action" (click)="read()">
++        <i class="fa-solid fa-book-open" aria-hidden="true"></i>
++        {{selectedSeries.pagesRead > 0 ? t('ink-library.continue-reading') : t('common.read')}}
++      </button>
++    }
++
+@@ -53 +81 @@
+-      <a class="btn btn-primary col-12 mt-2" [href]="viewSeriesUrl()" target="_blank" rel="noopener noreferrer">
++      <a class="btn btn-outline-secondary col-12 mt-2 ink-view-details" [href]="viewSeriesUrl()">
+diff --git a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.scss b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.scss
+index 56bc3994d..cb640f010 100644
+--- a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.scss
++++ b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.scss
+@@ -7,0 +8,103 @@
++.offcanvas-header {
++  min-height: 3.75rem;
++  padding: 1rem 1.25rem;
++  border-bottom: 0.0625rem solid var(--ink-border);
++}
++
++.offcanvas-title {
++  color: var(--ink-text-secondary);
++  font-size: 0.75rem;
++  font-weight: 600;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++
++.ink-preview-hero {
++  display: grid;
++  grid-template-columns: 8rem minmax(0, 1fr);
++  gap: 1rem;
++  align-items: start;
++  margin-bottom: 1.25rem;
++}
++
++.ink-preview-cover {
++  overflow: hidden;
++  border-radius: var(--ink-radius-sm);
++  background: var(--ink-background);
++}
++
++.ink-preview-heading {
++  min-width: 0;
++
++  h2 {
++    margin: 0 0 0.375rem;
++    color: var(--ink-text);
++    font-family: "EBGarmond", Georgia, serif;
++    font-size: 1.75rem;
++    font-weight: 600;
++    line-height: 1.08;
++  }
++
++  p {
++    margin: 0 0 0.75rem;
++    color: var(--ink-text-secondary);
++    font-size: 0.875rem;
++  }
++}
++
++.ink-format {
++  display: inline-block;
++  padding: 0.25rem 0.5rem;
++  color: var(--ink-text-secondary);
++  border: 0.0625rem solid var(--ink-border);
++  border-radius: var(--ink-radius-sm);
++  font-size: 0.6875rem;
++  letter-spacing: 0.04em;
++  text-transform: uppercase;
++}
++
++.ink-progress-block {
++  margin: 0 0 1rem;
++}
++
++.ink-progress-label {
++  display: flex;
++  justify-content: space-between;
++  margin-bottom: 0.5rem;
++  color: var(--ink-text-secondary);
++  font-size: 0.75rem;
++}
++
++.ink-progress-track {
++  height: 0.3125rem;
++  overflow: hidden;
++  border-radius: 999px;
++  background: var(--ink-progress-track);
++
++  span {
++    display: block;
++    height: 100%;
++    border-radius: inherit;
++    background: var(--ink-progress-fill);
++  }
++}
++
++.ink-read-action {
++  width: 100%;
++  min-height: 2.75rem;
++  margin-bottom: 0.5rem;
++  border-radius: var(--ink-radius-sm);
++  font-size: 0.875rem;
++  font-weight: 600;
++
++  i {
++    margin-right: 0.5rem;
++  }
++}
++
++.ink-view-details {
++  min-height: 2.75rem;
++  border-radius: var(--ink-radius-sm);
++  font-size: 0.8125rem;
++}
++
+@@ -24,0 +128 @@ a.read-more-link {
++  padding: 1.25rem;
+@@ -27,0 +132,10 @@ a.read-more-link {
++
++@media (max-width: 48rem) {
++  .offcanvas-header {
++    padding: 0.875rem 1rem;
++  }
++
++  .offcanvas-body {
++    padding: 1rem;
++  }
++}
+diff --git a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.ts b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.ts
+index 6617f4a08..73b8bb978 100644
+--- a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.ts
++++ b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.ts
+@@ -23,0 +24,3 @@ import {BreakpointService} from "../../_services/breakpoint.service";
++import {Series} from "../../_models/series";
++import {ReaderService} from "../../_services/reader.service";
++import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
+@@ -28 +31,2 @@ import {BreakpointService} from "../../_services/breakpoint.service";
+-    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent, OffCanvasResizeComponent],
++    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent,
++    OffCanvasResizeComponent, MangaFormatPipe],
+@@ -38,0 +43 @@ export class SeriesPreviewDrawerComponent implements OnInit {
++  private readonly readerService = inject(ReaderService);
+@@ -44,0 +50 @@ export class SeriesPreviewDrawerComponent implements OnInit {
++  series = input<Series>();
+@@ -66 +72 @@ export class SeriesPreviewDrawerComponent implements OnInit {
+-    return externalSeriesUrl ?? 'library/' + libraryId + '/series/' + seriesId;
++    return externalSeriesUrl ?? '/library/' + libraryId + '/series/' + seriesId;
+@@ -68,0 +75,5 @@ export class SeriesPreviewDrawerComponent implements OnInit {
++  progressPercent = computed(() => {
++    const series = this.series();
++    if (!series || series.pages <= 0) return 0;
++    return Math.min(100, Math.round((series.pagesRead / series.pages) * 100));
++  });
+@@ -124,0 +136,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
++  read() {
++    const series = this.series();
++    if (!series) return;
++    this.readerService.readSeries(series, false);
++  }
++
+diff --git a/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.html b/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.html
+index d9f93428a..ad0546e0d 100644
+--- a/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.html
++++ b/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.html
+@@ -43 +43 @@
+-          <div class="grid row g-0" #container id="card-detail-layout-items-container" [style.grid-template-columns]="gridColumnsTemplate()">
++          <div class="grid row g-0" [class.list-layout]="layoutMode() === 'list'" #container id="card-detail-layout-items-container" [style.grid-template-columns]="gridColumnsTemplate()">
+diff --git a/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.scss b/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.scss
+index 9817440d9..ae04787b1 100644
+--- a/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.scss
++++ b/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.scss
+@@ -29 +29 @@
+-    grid-gap: 0.5rem;
++    gap: 1rem 0.75rem;
+@@ -41 +41,3 @@
+-        grid-gap: 0.3rem;
++        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
++        gap: 1rem 0.75rem;
++        justify-items: stretch;
+@@ -42,0 +45 @@
++
+diff --git a/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.ts b/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.ts
+index 59b294247..276452edf 100644
+--- a/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.ts
++++ b/UI/Web/src/app/cards/card-detail-layout/card-detail-layout.component.ts
+@@ -104,0 +105 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
++  layoutMode = input<'grid' | 'list'>('grid');
+diff --git a/UI/Web/src/app/cards/entity-card/entity-card.component.scss b/UI/Web/src/app/cards/entity-card/entity-card.component.scss
+index 4e8204c2e..ca36f21c0 100644
+--- a/UI/Web/src/app/cards/entity-card/entity-card.component.scss
++++ b/UI/Web/src/app/cards/entity-card/entity-card.component.scss
+@@ -28,0 +29,6 @@
++  transition: background-color var(--ink-transition), border-color var(--ink-transition), transform var(--ink-transition);
++
++  &:hover {
++    background: var(--ink-surface);
++    transform: translateY(-0.125rem);
++  }
+@@ -113,2 +119 @@
+-    border-top-left-radius: 0.25rem;
+-    border-top-right-radius: 0.25rem;
++    border-radius: var(--ink-radius-sm);
+@@ -121,2 +126,2 @@
+-    border-top-left-radius: 0.25rem;
+-    border-top-right-radius: 0.25rem;
++    border-radius: var(--ink-radius-sm);
++    overflow: hidden;
+@@ -139 +144,2 @@
+-  padding-left: 0.3125rem;
++  min-height: 2.875rem;
++  padding: 0.375rem 0 0;
+@@ -146,2 +152,4 @@
+-    font-size: 0.8rem;
+-    text-align: center;
++    font-size: 0.8125rem;
++    font-weight: 600;
++    line-height: 1.35;
++    text-align: left;
+@@ -150,0 +159 @@
++      display: -webkit-box;
+@@ -152,2 +161,4 @@
+-      text-overflow: ellipsis;
+-      white-space: nowrap;
++      white-space: normal;
++      -webkit-box-orient: vertical;
++      -webkit-line-clamp: 2;
++      line-clamp: 2;
+@@ -166,0 +178 @@
++  visibility: visible;
+diff --git a/UI/Web/src/app/cards/series-card/series-card.component.ts b/UI/Web/src/app/cards/series-card/series-card.component.ts
+index 3d6e0bde5..157eaff86 100644
+--- a/UI/Web/src/app/cards/series-card/series-card.component.ts
++++ b/UI/Web/src/app/cards/series-card/series-card.component.ts
+@@ -97 +97,3 @@ export class SeriesCardComponent {
+-        panelClass: ''
++        panelClass: 'ink-series-preview',
++        backdrop: false,
++        scroll: true
+@@ -100,2 +102,2 @@ export class SeriesCardComponent {
+-      ref.setInput('seriesId', this.recommendedBySeriesId());
+-      ref.setInput('recommendedSeriesId', series.id);
++      ref.setInput('seriesId', series.id);
++      ref.setInput('recommendedSeriesId', this.recommendedBySeriesId());
+@@ -103,0 +106 @@ export class SeriesCardComponent {
++      ref.setInput('series', series);
+diff --git a/UI/Web/src/app/dashboard/_components/dashboard.component.scss b/UI/Web/src/app/dashboard/_components/dashboard.component.scss
+index 41bd182d0..0ea41c603 100644
+--- a/UI/Web/src/app/dashboard/_components/dashboard.component.scss
++++ b/UI/Web/src/app/dashboard/_components/dashboard.component.scss
+@@ -4,3 +4,3 @@
+-  --dashboard-surface: color-mix(in srgb, var(--card-bg-color) 88%, black);
+-  --dashboard-border: rgb(255 255 255 / 9%);
+-  --dashboard-muted: color-mix(in srgb, var(--body-text-color) 62%, transparent);
++  --dashboard-surface: var(--ink-surface);
++  --dashboard-border: var(--ink-border);
++  --dashboard-muted: var(--ink-text-secondary);
+@@ -32,2 +32,2 @@
+-  border-radius: 0.75rem;
+-  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 18%), 0 0.125rem 0.5rem rgb(0 0 0 / 18%);
++  border-radius: var(--ink-radius-md);
++  box-shadow: none;
+@@ -43,3 +43 @@
+-  opacity: 0.16;
+-  filter: blur(2.25rem) saturate(0.8);
+-  transform: scale(1.18);
++  display: none;
+@@ -50 +48 @@
+-  background: rgb(20 23 21 / 78%);
++  background: transparent;
+@@ -65 +63 @@
+-  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 32%);
++  box-shadow: none;
+@@ -119 +117 @@
+-  background: rgb(255 255 255 / 14%);
++  background: var(--ink-progress-track);
+@@ -126 +124 @@
+-  background: var(--primary-color);
++  background: var(--ink-progress-fill);
+@@ -184 +182 @@
+-    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 16%);
++    box-shadow: none;
+@@ -192,2 +190,2 @@
+-    border-color: rgb(74 198 148 / 48%);
+-    box-shadow: 0 0.75rem 1.75rem rgb(0 0 0 / 28%);
++    border-color: var(--ink-text-muted);
++    box-shadow: none;
+diff --git a/UI/Web/src/app/library-detail/library-detail.component.html b/UI/Web/src/app/library-detail/library-detail.component.html
+index 71e1873d3..0defadf86 100644
+--- a/UI/Web/src/app/library-detail/library-detail.component.html
++++ b/UI/Web/src/app/library-detail/library-detail.component.html
+@@ -4,2 +4,2 @@
+-      <h4 title>
+-        <span>{{libraryName()}}</span>
++      <h1 title class="ink-library-title">
++        <span>{{t('ink-library.title')}}</span>
+@@ -7 +7 @@
+-      </h4>
++      </h1>
+@@ -9 +9 @@
+-        <h5 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h5>
++        <p subtitle class="ink-library-subtitle">{{libraryName()}} · {{t('common.series-count', {num: pagination.totalItems | number})}}</p>
+@@ -11,0 +12,13 @@
++      <div main class="ink-layout-switch" role="group" [attr.aria-label]="t('ink-library.view-label')">
++        <button type="button" class="btn btn-icon" [class.active]="layoutMode() === 'grid'"
++                [attr.aria-pressed]="layoutMode() === 'grid'" [attr.aria-label]="t('preferences.cards')"
++                (click)="layoutMode.set('grid')">
++          <i class="fa-solid fa-grip" aria-hidden="true"></i>
++        </button>
++        <button type="button" class="btn btn-icon" [class.active]="layoutMode() === 'list'"
++                [attr.aria-pressed]="layoutMode() === 'list'" [attr.aria-label]="t('preferences.list')"
++                (click)="layoutMode.set('list')">
++          <i class="fa-solid fa-list" aria-hidden="true"></i>
++        </button>
++      </div>
++
+@@ -12,0 +26,21 @@
++
++    <nav class="ink-quick-filters" [attr.aria-label]="t('ink-library.quick-filters-label')">
++      <a class="ink-filter" routerLink="/all-series/">{{t('ink-library.all')}}</a>
++      @for (availableLibrary of libraries(); track availableLibrary.id) {
++        <a class="ink-filter"
++           [class.active]="availableLibrary.id === libraryId() && quickFilter() === 'library'"
++           [attr.aria-current]="availableLibrary.id === libraryId() && quickFilter() === 'library' ? 'page' : null"
++           [routerLink]="['/library', availableLibrary.id]">
++          {{availableLibrary.name}}
++        </a>
++      }
++      <button type="button" class="ink-filter" [class.active]="quickFilter() === 'progress'"
++              [attr.aria-pressed]="quickFilter() === 'progress'" (click)="setQuickFilter('progress')">
++        {{t('metadata-filter.in-progress')}}
++      </button>
++      <button type="button" class="ink-filter" [class.active]="quickFilter() === 'read'"
++              [attr.aria-pressed]="quickFilter() === 'read'" (click)="setQuickFilter('read')">
++        {{t('metadata-filter.read')}}
++      </button>
++    </nav>
++
+@@ -23,0 +58,2 @@
++        [layoutMode]="layoutMode()"
++        [gridColumnsTemplate]="layoutMode() === 'grid' ? 'repeat(auto-fill, minmax(9.25rem, 1fr))' : '1fr'"
+@@ -32 +68 @@
+-          <app-series-card [series]="item" [suppressLibraryLink]="true" (reload)="loadPage()"
++          <app-series-card [series]="item" [suppressLibraryLink]="true" [previewOnClick]="true" (reload)="loadPage()"
+diff --git a/UI/Web/src/app/library-detail/library-detail.component.scss b/UI/Web/src/app/library-detail/library-detail.component.scss
+index d31c59cbc..52293d290 100644
+--- a/UI/Web/src/app/library-detail/library-detail.component.scss
++++ b/UI/Web/src/app/library-detail/library-detail.component.scss
+@@ -1,3 +1,15 @@
+-.card {
+-    height: 400;
+-    width: 200;
++.main-container {
++    margin-top: 0;
++    padding: 1.5rem 1.75rem 0;
++}
++
++.ink-library-title {
++    display: flex;
++    align-items: center;
++    gap: 0.5rem;
++    margin: 0;
++    color: var(--ink-text);
++    font-family: "EBGarmond", Georgia, serif;
++    font-size: clamp(1.75rem, 2.25vw, 2.5rem);
++    font-weight: 600;
++    letter-spacing: -0.025em;
+@@ -6,4 +18,4 @@
+-.viewport {
+-    width: 37.5rem;
+-    height: 100%;
+-    overflow-y: auto;
++.ink-library-subtitle {
++    margin: 0.125rem 0 0;
++    color: var(--ink-text-secondary);
++    font-size: 0.8125rem;
+@@ -11,0 +24,6 @@
++.ink-layout-switch {
++    display: flex;
++    padding: 0.1875rem;
++    border: 0.0625rem solid var(--ink-border);
++    border-radius: var(--ink-radius-sm);
++    background: var(--ink-surface);
+@@ -13,2 +31,67 @@
+-.main-container {
+-    margin-top: 0.625rem;
++    .btn {
++        width: 2.25rem;
++        height: 2.25rem;
++        padding: 0;
++        color: var(--ink-text-muted);
++        border: 0;
++        border-radius: 0.25rem;
++
++        &.active,
++        &:hover {
++            color: var(--ink-text);
++            background: var(--ink-selection);
++        }
++    }
++}
++
++.ink-quick-filters {
++    display: flex;
++    gap: 0.25rem;
++    margin: 1rem 0 0.5rem;
++    padding-bottom: 0.75rem;
++    overflow-x: auto;
++    border-bottom: 0.0625rem solid var(--ink-border);
++    scrollbar-width: none;
++
++    &::-webkit-scrollbar {
++        display: none;
++    }
++}
++
++.ink-filter {
++    flex: 0 0 auto;
++    min-height: 2.25rem;
++    padding: 0.4375rem 0.75rem;
++    color: var(--ink-text-secondary);
++    border: 0;
++    border-radius: var(--ink-radius-sm);
++    background: transparent;
++    font: inherit;
++    font-size: 0.8125rem;
++    text-decoration: none;
++    transition: color var(--ink-transition), background-color var(--ink-transition);
++
++    &:hover,
++    &.active {
++        color: var(--ink-text);
++        background: var(--ink-selection);
++    }
++}
++
++@media (max-width: 48rem) {
++    .main-container {
++        padding: 1rem 0.875rem 0;
++    }
++
++    .ink-library-title {
++        font-size: 1.75rem;
++    }
++
++    .ink-library-subtitle {
++        display: none;
++    }
++
++    .ink-layout-switch .btn {
++        width: 2.75rem;
++        height: 2.75rem;
++    }
+diff --git a/UI/Web/src/app/library-detail/library-detail.component.ts b/UI/Web/src/app/library-detail/library-detail.component.ts
+index e385fac7f..3defb4f03 100644
+--- a/UI/Web/src/app/library-detail/library-detail.component.ts
++++ b/UI/Web/src/app/library-detail/library-detail.component.ts
+@@ -13 +13 @@ import {
+-import {ActivatedRoute, Router} from '@angular/router';
++import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+@@ -57 +57 @@ import {NotificationProgressEvent} from "../_models/events/notification-progress
+-    imports: [SideNavCompanionBarComponent, CardActionablesComponent,
++    imports: [SideNavCompanionBarComponent, CardActionablesComponent, RouterLink,
+@@ -94,0 +95,3 @@ export class LibraryDetailComponent implements OnInit {
++  libraries = signal<Library[]>([]);
++  layoutMode = signal<'grid' | 'list'>('grid');
++  quickFilter = signal<'library' | 'progress' | 'read'>('library');
+@@ -110,0 +114,4 @@ export class LibraryDetailComponent implements OnInit {
++    this.libraryService.getLibraries().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
++      this.libraries.set(libraries);
++      this.cdRef.markForCheck();
++    });
+@@ -192,0 +200,17 @@ export class LibraryDetailComponent implements OnInit {
++  setQuickFilter(mode: 'progress' | 'read') {
++    if (!this.filter) return;
++
++    const statements = this.filter.statements.filter(statement => statement.field !== SeriesFilterField.ReadProgress);
++    if (mode === 'progress') {
++      statements.push({field: SeriesFilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
++      statements.push({field: SeriesFilterField.ReadProgress, comparison: FilterComparison.LessThan, value: '100'});
++    } else {
++      statements.push({field: SeriesFilterField.ReadProgress, comparison: FilterComparison.GreaterThanEqual, value: '100'});
++    }
++
++    this.quickFilter.set(mode);
++    this.filter = {...this.filter, statements};
++    this.filterSettings.presetsV2 = this.filter;
++    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe(() => this.loadPage());
++  }
++
+diff --git a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
+index 24d51d174..777f9eea4 100644
+--- a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
++++ b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
+@@ -14 +14 @@
+-        <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-home" [title]="t('home')" link="/home/">
++        <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-play" [title]="t('continue-reading')" link="/home/">
+@@ -109,0 +110,7 @@
++
++        <div class="ink-side-nav-footer">
++          <app-side-nav-item icon="fa-gear" [title]="t('settings')" link="/settings/" />
++          @if (accountService.currentUser(); as user) {
++            <app-side-nav-item icon="fa-user" [title]="user.username" [link]="'/profile/' + user.id" />
++          }
++        </div>
+diff --git a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.scss b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.scss
+index e69de29bb..79fe67840 100644
+--- a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.scss
++++ b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.scss
+@@ -0,0 +1,5 @@
++.ink-side-nav-footer {
++  margin-top: auto;
++  padding-top: 0.75rem;
++  border-top: 0.0625rem solid var(--ink-border);
++}
+diff --git a/UI/Web/src/assets/langs/en.json b/UI/Web/src/assets/langs/en.json
+index 91a5de5e6..24997fcb5 100644
+--- a/UI/Web/src/assets/langs/en.json
++++ b/UI/Web/src/assets/langs/en.json
+@@ -151,0 +152,10 @@
++    "ink-library": {
++        "title": "Library",
++        "all": "All",
++        "view-label": "Library view",
++        "quick-filters-label": "Library filters",
++        "details": "Details",
++        "progress": "{{progress}}% complete",
++        "continue-reading": "Continue reading"
++    },
++
+@@ -1920,0 +1931,2 @@
++        "continue-reading": "Continue Reading",
++        "settings": "Settings",
+diff --git a/UI/Web/src/theme/components/_sidenav.scss b/UI/Web/src/theme/components/_sidenav.scss
+index 630acd3f6..dc2762e8a 100644
+--- a/UI/Web/src/theme/components/_sidenav.scss
++++ b/UI/Web/src/theme/components/_sidenav.scss
+@@ -10,2 +10,2 @@
+-  left: 0.625rem;
+-  top: 4rem;
++  left: 0;
++  top: var(--nav-offset);
+@@ -14,0 +15 @@
++  border-right-width: 0.0625rem;
+@@ -71,0 +73,2 @@
++    display: flex;
++    flex-direction: column;
+@@ -73,0 +77 @@
++    padding: 1rem 0.5rem;
+@@ -84 +88 @@
+-      min-height: 2.6rem;
++      min-height: 2.75rem;
+@@ -87 +91,3 @@
+-      font-size: 0.9rem;
++      font-size: 0.875rem;
++      border-radius: var(--ink-radius-sm);
++      transition: color var(--ink-transition), background-color var(--ink-transition);
+@@ -116,0 +123 @@
++        display: none;
+@@ -118 +125 @@
+-        width: 0.25rem;
++        width: 0.1875rem;
+@@ -150,3 +157 @@
+-        .active-highlight {
+-          background-color: var(--side-nav-item-active-color);
+-        }
++        font-weight: 600;
+@@ -373,0 +379 @@
++      padding: 0.75rem 0.5rem;
+diff --git a/UI/Web/src/theme/themes/dark.scss b/UI/Web/src/theme/themes/dark.scss
+index 932bccba1..f1de484a5 100644
+--- a/UI/Web/src/theme/themes/dark.scss
++++ b/UI/Web/src/theme/themes/dark.scss
+@@ -4,0 +5,18 @@
++  /* Kunini Ink design tokens. Keep the visual layer centralized so the
++   * customization can be rebased without changing application contracts. */
++  --ink-background: #0D0F12;
++  --ink-sidebar: #101216;
++  --ink-surface: #171A1F;
++  --ink-surface-elevated: #20242A;
++  --ink-border: #2B3038;
++  --ink-text: #F1F2F4;
++  --ink-text-secondary: #989EA8;
++  --ink-text-muted: #626A75;
++  --ink-accent: #D8DCE2;
++  --ink-progress-track: #30353D;
++  --ink-progress-fill: #E3E6EA;
++  --ink-selection: #2C3139;
++  --ink-radius-sm: 0.375rem;
++  --ink-radius-md: 0.625rem;
++  --ink-transition: 150ms ease;
++
+@@ -43,4 +61,4 @@
+-  --primary-color: #4ac694;
+-  --primary-color-dark-shade: #3B9E76;
+-  --primary-color-darker-shade: #338A67;
+-  --primary-color-darkest-shade: #25624A;
++  --primary-color: var(--ink-accent);
++  --primary-color-dark-shade: #BFC4CB;
++  --primary-color-darker-shade: #A8AFB8;
++  --primary-color-darkest-shade: #8D96A1;
+@@ -51 +69 @@
+-  --body-text-color: #efefef;
++  --body-text-color: var(--ink-text);
+@@ -55 +73 @@
+-  --text-muted-color: hsla(0,0%,100%,.45);
++  --text-muted-color: var(--ink-text-secondary);
+@@ -58 +76 @@
+-  --bs-body-bg: #1f2020;
++  --bs-body-bg: var(--ink-background);
+@@ -70 +88 @@
+-  --colorscape-enabled: true;
++  --colorscape-enabled: false;
+@@ -122,3 +140,3 @@
+-  --navbar-bg-color: #111312;
+-  --navbar-text-color: white;
+-  --navbar-fa-icon-color: white;
++  --navbar-bg-color: var(--ink-background);
++  --navbar-text-color: var(--ink-text);
++  --navbar-fa-icon-color: var(--ink-text-secondary);
+@@ -132,7 +150,7 @@
+-  --input-bg-color: #343a40;
+-  --input-bg-readonly-color: #434648;
+-  --input-focused-border-color: #ccc;
+-  --input-text-color: #fff;
+-  --input-placeholder-color: #aeaeae;
+-  --input-border-color: #ccc;
+-  --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
++  --input-bg-color: var(--ink-surface);
++  --input-bg-readonly-color: var(--ink-surface-elevated);
++  --input-focused-border-color: var(--ink-accent);
++  --input-text-color: var(--ink-text);
++  --input-placeholder-color: var(--ink-text-secondary);
++  --input-border-color: var(--ink-border);
++  --input-focus-boxshadow-color: rgb(216 220 226 / 22%);
+@@ -153 +171 @@
+-  --btn-primary-text-color: white;
++  --btn-primary-text-color: var(--ink-background);
+@@ -156 +174 @@
+-  --btn-primary-hover-text-color: white;
++  --btn-primary-hover-text-color: var(--ink-background);
+@@ -165,2 +183,2 @@
+-  --btn-secondary-bg-color: #6c757d;
+-  --btn-secondary-border-color: #6c757d;
++  --btn-secondary-bg-color: var(--ink-surface-elevated);
++  --btn-secondary-border-color: var(--ink-border);
+@@ -233,2 +251,2 @@
+-  --modal-bg-color: #202122;
+-  --modal-footer-bg-color: #292929;
++  --modal-bg-color: var(--ink-surface);
++  --modal-footer-bg-color: var(--ink-surface-elevated);
+@@ -279 +297 @@
+-  --side-nav-width: 14.375rem;
++  --side-nav-width: 13.75rem;
+@@ -281,2 +299,2 @@
+-  --side-nav-bg-color: #1b1e1c;
+-  --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
++  --side-nav-bg-color: var(--ink-sidebar);
++  --side-nav-mobile-bg-color: var(--ink-sidebar);
+@@ -286,6 +304,6 @@
+-  --side-nav-hover-text-color: white;
+-  --side-nav-hover-bg-color: rgb(255 255 255 / 6%);
+-  --side-nav-text-color: hsla(0, 0%, 100%, .85);
+-  --side-nav-header-text-color: white;
+-  --side-nav-border-radius: 0.1875rem;
+-  --side-nav-border: none;
++  --side-nav-hover-text-color: var(--ink-text);
++  --side-nav-hover-bg-color: var(--ink-surface);
++  --side-nav-text-color: var(--ink-text-secondary);
++  --side-nav-header-text-color: var(--ink-text);
++  --side-nav-border-radius: 0;
++  --side-nav-border: 0 solid var(--ink-border);
+@@ -297,3 +315,3 @@
+-  --side-nav-item-active-color: var(--primary-color);
+-  --side-nav-item-active-text-color: #fff;
+-  --side-nav-active-bg-color: color-mix(in srgb, var(--primary-color) 13%, transparent);
++  --side-nav-item-active-color: var(--ink-accent);
++  --side-nav-item-active-text-color: var(--ink-text);
++  --side-nav-active-bg-color: var(--ink-selection);
+@@ -343,2 +361,2 @@
+-  --progress-bg-color: var(--nav-header-bg-color);
+-  --progress-bar-color: var(--primary-color-dark-shade);
++  --progress-bg-color: var(--ink-progress-track);
++  --progress-bar-color: var(--ink-progress-fill);
+@@ -348 +366 @@
+-  --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
++  --dropdown-item-hover-bg-color: var(--ink-selection);
+@@ -350 +368 @@
+-  --dropdown-item-bg-color: #2C2C2C;
++  --dropdown-item-bg-color: var(--ink-surface-elevated);
+@@ -389,2 +407,2 @@
+-  --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+-  --brand-font-family: "Spartan", sans-serif;
++  --body-font-family: "Poppins", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
++  --brand-font-family: "EBGarmond", Georgia, serif;
+@@ -394 +412 @@
+-  --card-bg-color: var(--elevation-layer3);
++  --card-bg-color: transparent;
+@@ -399,2 +417,2 @@
+-  --card-border-radius: 0.3125rem;
+-  --card-progress-bar-color: var(--primary-color);
++  --card-border-radius: var(--ink-radius-sm);
++  --card-progress-bar-color: var(--ink-progress-fill);
+@@ -402 +420 @@
+-  --card-overlay-hover-bg-color: rgba(30,30,30,.6);
++  --card-overlay-hover-bg-color: rgb(13 15 18 / 45%);
+@@ -408,3 +426,3 @@
+-  --card-hover-bg-color: #3a3a3a;
+-  --card-image-height: 14.5625rem;
+-  --card-image-width: 10rem;
++  --card-hover-bg-color: var(--ink-surface);
++  --card-image-height: 13.5rem;
++  --card-image-width: 9.25rem;
+@@ -437,2 +455,2 @@
+-  --drawer-bg-color: #292929;
+-  --drawer-text-color: white;
++  --drawer-bg-color: var(--ink-surface);
++  --drawer-text-color: var(--ink-text);
