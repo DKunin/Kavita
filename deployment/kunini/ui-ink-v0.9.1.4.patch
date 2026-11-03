@@ -424,20 +424,22 @@ index 4e8204c2e..ca36f21c0 100644
 @@ -166,0 +178 @@
 +  visibility: visible;
 diff --git a/UI/Web/src/app/cards/series-card/series-card.component.ts b/UI/Web/src/app/cards/series-card/series-card.component.ts
-index 3d6e0bde5..157eaff86 100644
+index 3d6e0bde5..a1bcb0971 100644
 --- a/UI/Web/src/app/cards/series-card/series-card.component.ts
 +++ b/UI/Web/src/app/cards/series-card/series-card.component.ts
-@@ -97 +97,3 @@ export class SeriesCardComponent {
+@@ -69,0 +70 @@ export class SeriesCardComponent {
++        ...(this.previewOnClick() ? {readFunc: null} : {}),
+@@ -97 +98,3 @@ export class SeriesCardComponent {
 -        panelClass: ''
 +        panelClass: 'ink-series-preview',
 +        backdrop: false,
 +        scroll: true
-@@ -100,2 +102,2 @@ export class SeriesCardComponent {
+@@ -100,2 +103,2 @@ export class SeriesCardComponent {
 -      ref.setInput('seriesId', this.recommendedBySeriesId());
 -      ref.setInput('recommendedSeriesId', series.id);
 +      ref.setInput('seriesId', series.id);
 +      ref.setInput('recommendedSeriesId', this.recommendedBySeriesId());
-@@ -103,0 +106 @@ export class SeriesCardComponent {
+@@ -103,0 +107 @@ export class SeriesCardComponent {
 +      ref.setInput('series', series);
 diff --git a/UI/Web/src/app/dashboard/_components/dashboard.component.scss b/UI/Web/src/app/dashboard/_components/dashboard.component.scss
 index 41bd182d0..0ea41c603 100644
