@@ -13,6 +13,69 @@ Bookmark; `dkunin` сохраняет Admin. Парольный вход Kavita 
 `/api/*` не получает HTML-редирект и использует штатный персональный `x-api-key`
 или bearer token Kavita.
 
+## Обогащение описаний книг
+
+`metadata_enricher.py` заполняет только пустые описания серий через штатный API
+Kavita. По умолчанию команда работает в режиме аудита: получает данные из Open
+Library, при необходимости предлагает атрибутированное вступление из Wikipedia
+и формирует закрытый отчёт с исходным DTO, источником, лицензией и уверенностью
+сопоставления. Для архивов комиксов можно дополнительно подключить Metron через
+отдельный token-файл с режимом `0600`.
+
+Open Library опрашивается пакетно по автору, ответы внешних провайдеров
+кэшируются. Точное ISBN или единственное точное совпадение названия и автора
+помечается как готовое к применению. Wikipedia, неоднозначные и нечёткие
+совпадения всегда остаются на ручную проверку. Непроиндексированные CBR/CBZ
+нужно сначала добавить в отдельную библиотеку комиксов Kavita.
+
+```bash
+state=/var/apps/kavita/metadata-enricher
+install -d -m 700 "${state}" "${state}/cache" "${state}/backups"
+python3 deployment/kunini/metadata_enricher.py audit \
+  --api-key-file /var/apps/kavita/secrets/dkunin-kover-api-key \
+  --cache-dir "${state}/cache" \
+  --library-root /mnt/data/plex/books \
+  --output "${state}/report.json"
+sha256sum "${state}/report.json"
+jq '{inventory, diskInventory: .diskInventory.counts, stats}' \
+  "${state}/report.json"
+```
+
+Отчёт создаётся с режимом `0600`. Перед записью нужно просмотреть каждую запись
+с `decision == "review"`; для принятой вручную записи установить
+`approved: true`, затем заново вычислить SHA-256. Запись требует хеш именно этой
+версии отчёта:
+
+```bash
+python3 deployment/kunini/metadata_enricher.py apply \
+  --api-key-file /var/apps/kavita/secrets/dkunin-kover-api-key \
+  --report "${state}/report.json" \
+  --confirm-sha256 '<reviewed-report-sha256>' \
+  --database-path /var/apps/kavita/deployment/kunini/config/kavita.db \
+  --backup-dir "${state}/backups" \
+  --journal "${state}/apply-journal.json"
+```
+
+Перед первой записью команда повторно читает все целевые DTO и полностью
+отказывается от изменений при любом дрейфе. Затем она создаёт online-копию БД,
+проверяет её через `PRAGMA quick_check`, меняет только `summary` и
+`summaryLocked`, перечитывает каждую серию и атомарно дописывает журнал.
+
+Откат также защищён хешем журнала и отдельной резервной копией текущей БД:
+
+```bash
+python3 deployment/kunini/metadata_enricher.py rollback \
+  --api-key-file /var/apps/kavita/secrets/dkunin-kover-api-key \
+  --journal "${state}/apply-journal.json" \
+  --confirm-sha256 '<apply-journal-sha256>' \
+  --database-path /var/apps/kavita/deployment/kunini/config/kavita.db \
+  --backup-dir "${state}/backups"
+```
+
+Google Books и недокументированные методы The Open Book Database намеренно не
+используются: первый источник не подходит для постоянного копирования ответов,
+а у второго не подтверждены публичный API и лицензия данных.
+
 ## Деплой
 
 UI собирается локально из совместимого с runtime тега `v0.9.1.4`: поверх него
