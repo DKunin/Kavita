@@ -538,6 +538,7 @@ BenchmarkDotNet.Artifacts
 Kavita.Server/config/*backup.zip
 CLAUDE.md
 /secrets/
+/metadata-enricher/
 
 
 Kavita.Services.Tests/Test Data/ImageService/**/*_output*.*
