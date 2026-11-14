@@ -21,6 +21,7 @@ import {
   ResizeMode
 } from "../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {LicenseService} from "../../_services/license.service";
 
 @Component({
     selector: 'app-series-preview-drawer',
@@ -36,6 +37,7 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly imageService = inject(ImageService);
   private readonly actionService = inject(ActionService);
+  private readonly licenseService = inject(LicenseService);
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly FilterField = SeriesFilterField;
@@ -91,8 +93,9 @@ export class SeriesPreviewDrawerComponent implements OnInit {
       this.seriesService.getMetadata(this.seriesId()).subscribe(data => {
         this.localSeries.set(data);
 
-        // Consider the localSeries has no metadata, try to merge the external Series metadata
-        if (this.localSeries()!.summary === '' && this.localSeries()!.genres.length === 0) {
+        // Only Kavita+ can merge external metadata. Without a license, keep the local archive metadata.
+        if (this.licenseService.hasActiveLicense() &&
+            this.localSeries()!.summary === '' && this.localSeries()!.genres.length === 0) {
           this.seriesService.getExternalSeriesDetails(this.seriesId(), 0, 0, 0, this.recommendedSeriesId()).subscribe(externalSeriesData => {
             this.isExternalSeries.set(true);
             this.externalSeries.set(externalSeriesData);

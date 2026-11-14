@@ -326,28 +326,39 @@ diff --git a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-
 index 6617f4a08..73b8bb978 100644
 --- a/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.ts
 +++ b/UI/Web/src/app/_single-module/series-preview-drawer/series-preview-drawer.component.ts
-@@ -23,0 +24,3 @@ import {BreakpointService} from "../../_services/breakpoint.service";
+@@ -23,0 +24,4 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 +import {Series} from "../../_models/series";
 +import {ReaderService} from "../../_services/reader.service";
 +import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
-@@ -28 +31,2 @@ import {BreakpointService} from "../../_services/breakpoint.service";
++import {LicenseService} from "../../_services/license.service";
+@@ -28 +32,2 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 -    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent, OffCanvasResizeComponent],
 +    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent,
 +    OffCanvasResizeComponent, MangaFormatPipe],
-@@ -38,0 +43 @@ export class SeriesPreviewDrawerComponent implements OnInit {
+@@ -38,0 +44,2 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 +  private readonly readerService = inject(ReaderService);
-@@ -44,0 +50 @@ export class SeriesPreviewDrawerComponent implements OnInit {
++  private readonly licenseService = inject(LicenseService);
+@@ -44,0 +52 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 +  series = input<Series>();
-@@ -66 +72 @@ export class SeriesPreviewDrawerComponent implements OnInit {
+@@ -66 +74 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 -    return externalSeriesUrl ?? 'library/' + libraryId + '/series/' + seriesId;
 +    return externalSeriesUrl ?? '/library/' + libraryId + '/series/' + seriesId;
-@@ -68,0 +75,5 @@ export class SeriesPreviewDrawerComponent implements OnInit {
+@@ -68,0 +77,5 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 +  progressPercent = computed(() => {
 +    const series = this.series();
 +    if (!series || series.pages <= 0) return 0;
 +    return Math.min(100, Math.round((series.pagesRead / series.pages) * 100));
 +  });
-@@ -124,0 +136,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
+@@ -94,5 +108,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
+-        // Consider the localSeries has no metadata, try to merge the external Series metadata
+-        if (this.localSeries()!.summary === '' && this.localSeries()!.genres.length === 0) {
++        // Only Kavita+ can merge external metadata. Without a license, keep the local archive metadata.
++        if (this.licenseService.hasActiveLicense() &&
++            this.localSeries()!.summary === '' && this.localSeries()!.genres.length === 0) {
+           this.seriesService.getExternalSeriesDetails(this.seriesId(), 0, 0, 0, this.recommendedSeriesId()).subscribe(externalSeriesData => {
+             this.isExternalSeries.set(true);
+             this.externalSeries.set(externalSeriesData);
+@@ -124,0 +139,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 +  read() {
 +    const series = this.series();
 +    if (!series) return;
