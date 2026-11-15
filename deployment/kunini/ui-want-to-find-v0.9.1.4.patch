@@ -2,14 +2,10 @@ diff --git a/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts b/UI/Web
 index 2d6ef4e4c..87308538c 100644
 --- a/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts
 +++ b/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts
-@@ -7,5 +7,6 @@ export enum SideNavStreamType {
-   ExternalSource = 6,
-   AllSeries = 7,
-   WantToRead = 8,
+@@ -10 +10,2 @@ export enum SideNavStreamType {
 -  BrowseAuthors = 9
 +  BrowseAuthors = 9,
 +  WantToFind = 10
- }
 diff --git a/UI/Web/src/app/_models/want-to-find/want-to-find.ts b/UI/Web/src/app/_models/want-to-find/want-to-find.ts
 new file mode 100644
 index 000000000..140a66c10
@@ -87,34 +83,22 @@ diff --git a/UI/Web/src/app/app-routing.module.ts b/UI/Web/src/app/app-routing.m
 index 6f3057676..862a55630 100644
 --- a/UI/Web/src/app/app-routing.module.ts
 +++ b/UI/Web/src/app/app-routing.module.ts
-@@ -48,6 +48,10 @@ export const routes: Routes = [
-         path: 'want-to-read',
-         loadChildren: () => import('./_routes/want-to-read-routing.module').then(m => m.routes)
-       },
+@@ -50,0 +51,4 @@ export const routes: Routes = [
 +      {
 +        path: 'want-to-find',
 +        loadChildren: () => import('./_routes/want-to-find-routing.module').then(m => m.routes)
 +      },
-       {
-         path: 'home',
-         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
 diff --git a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
 index 777f9eea4..79093796a 100644
 --- a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
 +++ b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
-@@ -83,6 +83,12 @@
-                                    [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/" />
-               }
- 
+@@ -85,0 +86,6 @@
 +              @case (SideNavStreamType.WantToFind) {
 +                <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
 +                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode"
 +                                   icon="fa-magnifying-glass" [title]="t('want-to-find')" link="/want-to-find/" />
 +              }
 +
-               @case (SideNavStreamType.BrowseAuthors) {
-                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                    [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-users" [title]="t('browse-people')" link="/browse/people/" />
 diff --git a/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.html b/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.html
 new file mode 100644
 index 000000000..855e983b9
@@ -645,18 +629,9 @@ diff --git a/UI/Web/src/assets/langs/en.json b/UI/Web/src/assets/langs/en.json
 index 24997fcb5..4672e5e71 100644
 --- a/UI/Web/src/assets/langs/en.json
 +++ b/UI/Web/src/assets/langs/en.json
-@@ -6,6 +6,7 @@
-         "collections": "Collections",
-         "browse-genres": "Browse Genres",
-         "browse-tags": "Browse Tags",
+@@ -8,0 +9 @@
 +        "want-to-find": "Want To Find",
-         "want-to-read": "Want To Read",
-         "reading-lists": "Reading Lists",
-         "settings": "Settings",
-@@ -232,6 +233,42 @@
-         "no-items-filtered": "No items match your current filter."
-     },
- 
+@@ -234,0 +236,36 @@
 +    "want-to-find": {
 +        "page-title": "Want To Find",
 +        "item-count": "{{count}} wanted titles",
@@ -693,33 +668,15 @@ index 24997fcb5..4672e5e71 100644
 +        "resolved": "Matched title removed from Want To Find"
 +    },
 +
-     "user-preferences": {
-         "title": "User Dashboard",
-         "pref-description": "These are global settings that are bound to your account. Reader settings are located in Reading Profiles.",
-@@ -1930,6 +1967,7 @@
-         "home": "Home",
-         "continue-reading": "Continue Reading",
-         "settings": "Settings",
+@@ -1932,0 +1970 @@
 +        "want-to-find": "Want To Find",
-         "want-to-read": "Want To Read",
-         "collections": "Collections",
-         "reading-lists": "Reading Lists",
-@@ -4133,6 +4171,7 @@
-         "recently-updated": "{{dashboard.recently-updated-title}}",
-         "newly-added": "{{dashboard.recently-added-title}}",
-         "more-in-genre": "{{dashboard.more-in-genre-title}}",
+@@ -4135,0 +4174 @@
 +        "want-to-find": "{{side-nav.want-to-find}}",
-         "want-to-read": "{{side-nav.want-to-read}}",
-         "collections": "{{side-nav.collections}}",
-         "reading-lists": "{{side-nav.reading-lists}}",
 diff --git a/UI/Web/src/assets/langs/ru.json b/UI/Web/src/assets/langs/ru.json
 index e35dd6f5c..034b44f9c 100644
 --- a/UI/Web/src/assets/langs/ru.json
 +++ b/UI/Web/src/assets/langs/ru.json
-@@ -64,6 +64,41 @@
-         "no-items": "Нет ни одного элемента. Попробуйте добавить произведение.",
-         "no-items-filtered": "Ни один элемент не соответствует текущему фильтру."
-     },
+@@ -66,0 +67,35 @@
 +    "want-to-find": {
 +        "page-title": "Хочу найти",
 +        "item-count": "К поиску: {{count}}",
@@ -755,30 +712,9 @@ index e35dd6f5c..034b44f9c 100644
 +        "deleted": "Удалено из списка «Хочу найти»",
 +        "resolved": "Найденная книга удалена из списка «Хочу найти»"
 +    },
-     "user-preferences": {
-         "title": "Панель управления пользователя",
-         "pref-description": "Это глобальные настройки, привязанные к вашей учётной записи. Параметры читателя находятся в профилях чтения.",
-@@ -519,6 +554,7 @@
-         "customize": "{{settings.customize}}",
-         "home": "Главная",
-         "reading-lists": "Списки чтения",
+@@ -521,0 +557 @@
 +        "want-to-find": "Хочу найти",
-         "want-to-read": "Хочу прочитать",
-         "collections": "Коллекции",
-         "bookmarks": "Закладки",
-@@ -1529,6 +1565,7 @@
-         "recently-updated": "{{dashboard.recently-updated-title}}",
-         "newly-added": "{{dashboard.recently-added-title}}",
-         "more-in-genre": "{{dashboard.more-in-genre-title}}",
+@@ -1531,0 +1568 @@
 +        "want-to-find": "{{side-nav.want-to-find}}",
-         "want-to-read": "{{side-nav.want-to-read}}",
-         "collections": "{{side-nav.collections}}",
-         "reading-lists": "{{side-nav.reading-lists}}",
-@@ -2939,6 +2976,7 @@
-         "collections": "Коллекции",
-         "browse-genres": "Просмотреть Жанры",
-         "browse-tags": "Просмотреть Теги",
+@@ -2941,0 +2979 @@
 +        "want-to-find": "Хочу найти",
-         "want-to-read": "Хочу Прочитать"
-     }
- }

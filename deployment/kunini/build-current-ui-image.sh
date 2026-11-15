@@ -30,8 +30,8 @@ git -C "${repo_dir}" apply --directory="${relative_build_root}" --check "${ui_pa
 git -C "${repo_dir}" apply --directory="${relative_build_root}" "${ui_patch}"
 git -C "${repo_dir}" apply --unidiff-zero --directory="${relative_build_root}" --check "${ink_patch}"
 git -C "${repo_dir}" apply --unidiff-zero --directory="${relative_build_root}" "${ink_patch}"
-git -C "${repo_dir}" apply --directory="${relative_build_root}" --check "${feature_patch}"
-git -C "${repo_dir}" apply --directory="${relative_build_root}" "${feature_patch}"
+git -C "${repo_dir}" apply --unidiff-zero --directory="${relative_build_root}" --check "${feature_patch}"
+git -C "${repo_dir}" apply --unidiff-zero --directory="${relative_build_root}" "${feature_patch}"
 
 base_revision="$(docker image inspect "${base_image}" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
 if [[ -z "${base_revision}" || "${base_revision}" == '<no value>' ]]; then
