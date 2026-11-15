@@ -7,11 +7,20 @@ revision="$(git -C "${repo_dir}" rev-parse HEAD)"
 short_revision="$(git -C "${repo_dir}" rev-parse --short=12 HEAD)"
 base_image="${KAVITA_BASE_IMAGE:?Set KAVITA_BASE_IMAGE to the deployed feature image}"
 image="${KAVITA_IMAGE:-kavita-kunini:${short_revision}}"
+mkdir -p "${repo_dir}/tmp"
+build_root="$(mktemp -d "${repo_dir}/tmp/kavita-current-ui.XXXXXX")"
+
+cleanup() {
+    rm -rf -- "${build_root}"
+}
+trap cleanup EXIT
 
 if [[ -n "$(git -C "${repo_dir}" status --porcelain --untracked-files=all -- UI/Web)" ]]; then
     printf 'UI/Web must be clean so the image matches revision %s.\n' "${revision}" >&2
     exit 1
 fi
+
+git -C "${repo_dir}" archive --format=tar "${revision}^{commit}" -- UI/Web | tar -xf - -C "${build_root}"
 
 base_revision="$(docker image inspect "${base_image}" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
 if [[ -z "${base_revision}" || "${base_revision}" == '<no value>' ]]; then
@@ -27,6 +36,6 @@ docker build \
     --build-arg "UI_SOURCE_REF=${revision}" \
     --build-arg "FEATURE_BASE_REVISION=${base_revision}" \
     --tag "${image}" \
-    "${repo_dir}/UI/Web"
+    "${build_root}/UI/Web"
 
 printf 'Built %s for revision %s on feature base %s.\n' "${image}" "${revision}" "${base_revision}"
