@@ -1,3 +1,4 @@
+ARG KAVITA_RUNTIME_IMAGE=jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
 FROM --platform=$BUILDPLATFORM node:24.15.0-bookworm-slim@sha256:4e6b70dd6cbfc88c8157ba19aa3d9f9cce6ba4703576d55459e45efcbc9c5f5d AS ui-build
 
 WORKDIR /src
@@ -8,7 +9,6 @@ RUN npm ci --legacy-peer-deps
 COPY . ./
 RUN npm run prod
 
-ARG KAVITA_RUNTIME_IMAGE=jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
 FROM ${KAVITA_RUNTIME_IMAGE}
 
 ARG SOURCE_REVISION=unknown
