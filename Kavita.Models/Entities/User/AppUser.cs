@@ -47,6 +47,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public ICollection<AppUserWantToRead> WantToRead { get; set; } = null!;
     /// <summary>
+    /// Metadata-only titles the user wants to acquire.
+    /// </summary>
+    public ICollection<AppUserWantToFind> WantToFind { get; set; } = null!;
+    /// <summary>
     /// A list of Devices which allows the user to send files to
     /// </summary>
     public ICollection<Device> Devices { get; set; } = null!;

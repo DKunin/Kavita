@@ -167,6 +167,7 @@ public class EndpointAccessTests
         ["StreamController.UpdateSideNavStream(SideNavStreamDto):SideNavStreamDto.LibraryId"] = "LibraryId is not read, only Id and Visible",
         ["WantToReadController.AddSeries(UpdateWantToReadDto):UpdateWantToReadDto.SeriesIds"] = "HasAccessToSeries (all ids) in body",
         ["WantToReadController.RemoveSeries(UpdateWantToReadDto):UpdateWantToReadDto.SeriesIds"] = "Only removes and scrobbles the caller's own want-to-read rows",
+        ["WantToFindController.Resolve(ResolveWantToFindDto):ResolveWantToFindDto.SeriesId"] = "HasAccessToSeries in body",
     };
 
     [Fact]

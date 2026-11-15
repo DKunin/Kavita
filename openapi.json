@@ -21943,6 +21943,192 @@
         }
       }
     },
+    "/api/want-to-find": {
+      "get": {
+        "tags": [
+          "WantToFind"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WantToFindDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WantToFindDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WantToFindDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "WantToFind"
+        ],
+        "parameters": [
+          {
+            "name": "wantToFindId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/want-to-find/create": {
+      "post": {
+        "tags": [
+          "WantToFind"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWantToFindDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWantToFindDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWantToFindDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToFindDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToFindDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToFindDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/want-to-find/update": {
+      "post": {
+        "tags": [
+          "WantToFind"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWantToFindDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWantToFindDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWantToFindDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToFindDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToFindDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToFindDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/want-to-find/resolve": {
+      "post": {
+        "tags": [
+          "WantToFind"
+        ],
+        "summary": "Removes a metadata-only item after it is matched to an accessible library series.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveWantToFindDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveWantToFindDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveWantToFindDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/want-to-read/v2": {
       "post": {
         "tags": [
@@ -31082,6 +31268,27 @@
         },
         "additionalProperties": false
       },
+      "ResolveWantToFindDto": {
+        "required": [
+          "seriesId",
+          "wantToFindId"
+        ],
+        "type": "object",
+        "properties": {
+          "wantToFindId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "addToWantToRead": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "ReviewScrobbleTarget": {
         "enum": [
           0,
@@ -32873,10 +33080,11 @@
           6,
           7,
           8,
-          9
+          9,
+          10
         ],
         "type": "integer",
-        "description": "Members:\n- `1` — Collections\n- `2` — ReadingLists\n- `3` — Bookmarks\n- `4` — Library\n- `5` — SmartFilter\n- `6` — ExternalSource\n- `7` — AllSeries\n- `8` — WantToRead\n- `9` — BrowsePeople",
+        "description": "Members:\n- `1` — Collections\n- `2` — ReadingLists\n- `3` — Bookmarks\n- `4` — Library\n- `5` — SmartFilter\n- `6` — ExternalSource\n- `7` — AllSeries\n- `8` — WantToRead\n- `9` — BrowsePeople\n- `10` — WantToFind",
         "format": "int32",
         "x-enum-varnames": [
           "Collections",
@@ -32887,7 +33095,8 @@
           "ExternalSource",
           "AllSeries",
           "WantToRead",
-          "BrowsePeople"
+          "BrowsePeople",
+          "WantToFind"
         ],
         "x-enum-descriptions": [
           "Collections",
@@ -32898,7 +33107,8 @@
           "ExternalSource",
           "AllSeries",
           "WantToRead",
-          "BrowsePeople"
+          "BrowsePeople",
+          "WantToFind"
         ]
       },
       "SignalRMessageDto": {
@@ -35309,6 +35519,57 @@
         },
         "additionalProperties": false
       },
+      "UpsertWantToFindDto": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "authors": {
+            "maxLength": 1024,
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "isbn": {
+            "maxLength": 64,
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "maxLength": 256,
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "maxLength": 2048,
+            "type": "string",
+            "nullable": true
+          },
+          "sourceUrl": {
+            "maxLength": 2048,
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UserDto": {
         "type": "object",
         "properties": {
@@ -36078,6 +36339,56 @@
         },
         "additionalProperties": false
       },
+      "WantToFindDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "authors": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "WritingStyle": {
         "enum": [
           0,
@@ -36289,6 +36600,10 @@
     },
     {
       "name": "Volume"
+    },
+    {
+      "name": "WantToFind",
+      "description": "Metadata-only titles the current user wants to acquire."
     },
     {
       "name": "WantToRead",

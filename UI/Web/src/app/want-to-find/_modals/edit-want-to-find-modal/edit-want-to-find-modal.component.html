@@ -1,0 +1,63 @@
+<ng-container *transloco="let t; prefix: 'want-to-find'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t(item() ? 'edit-title' : 'create-title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="want-to-find-title" class="form-label">{{t('title-label')}}</label>
+      <input id="want-to-find-title" class="form-control" type="text"
+             [formField]="formGroup.title" [appFormField]="formGroup.title">
+      <app-validation-errors inputId="want-to-find-title" [control]="formGroup.title" />
+    </div>
+
+    <div class="mb-3">
+      <label for="want-to-find-authors" class="form-label">{{t('authors-label')}}</label>
+      <input id="want-to-find-authors" class="form-control" type="text"
+             [formField]="formGroup.authors" [appFormField]="formGroup.authors">
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label for="want-to-find-isbn" class="form-label">{{t('isbn-label')}}</label>
+        <input id="want-to-find-isbn" class="form-control" type="text"
+               [formField]="formGroup.isbn" [appFormField]="formGroup.isbn">
+      </div>
+      <div class="col-md-6">
+        <label for="want-to-find-external-id" class="form-label">{{t('external-id-label')}}</label>
+        <input id="want-to-find-external-id" class="form-control" type="text"
+               [formField]="formGroup.externalId" [appFormField]="formGroup.externalId">
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="want-to-find-summary" class="form-label">{{t('summary-label')}}</label>
+      <textarea id="want-to-find-summary" class="form-control" rows="3"
+                [formField]="formGroup.summary" [appFormField]="formGroup.summary"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="want-to-find-cover" class="form-label">{{t('cover-url-label')}}</label>
+      <input id="want-to-find-cover" class="form-control" type="url"
+             placeholder="https://" [formField]="formGroup.coverUrl" [appFormField]="formGroup.coverUrl">
+    </div>
+
+    <div class="mb-3">
+      <label for="want-to-find-source" class="form-label">{{t('source-url-label')}}</label>
+      <input id="want-to-find-source" class="form-control" type="url"
+             placeholder="https://" [formField]="formGroup.sourceUrl" [appFormField]="formGroup.sourceUrl">
+    </div>
+
+    <div class="mb-1">
+      <label for="want-to-find-notes" class="form-label">{{t('notes-label')}}</label>
+      <textarea id="want-to-find-notes" class="form-control" rows="3"
+                [formField]="formGroup.notes" [appFormField]="formGroup.notes"></textarea>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="formGroup().invalid()" (click)="save()">{{t('save')}}</button>
+  </div>
+</ng-container>

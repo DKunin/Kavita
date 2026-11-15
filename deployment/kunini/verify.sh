@@ -36,7 +36,8 @@ if [[ "${expected_image}" == kavita-kunini:* ]]; then
     fi
     curl --fail --silent http://127.0.0.1:5000/assets/langs/en.json >"${temporary_dir}/en.json"
     if ! jq -e '.dashboard["continue-reading-title"] == "Continue reading"
-        and .["ink-library"].title == "Library"' "${temporary_dir}/en.json" >/dev/null; then
+        and .["ink-library"].title == "Library"
+        and .["want-to-find"]["page-title"] == "Want To Find"' "${temporary_dir}/en.json" >/dev/null; then
         echo "The deployed UI does not contain the Kunini Ink experience." >&2
         exit 1
     fi
@@ -76,6 +77,9 @@ printf '\n' >>"${temporary_dir}/api-key-header"
 curl --fail --silent --show-error --header "@${temporary_dir}/api-key-header" \
     --resolve "${domain}:443:127.0.0.1" \
     "https://${domain}/api/Library/libraries" >"${temporary_dir}/libraries.json"
+curl --fail --silent --show-error --header "@${temporary_dir}/api-key-header" \
+    --resolve "${domain}:443:127.0.0.1" \
+    "https://${domain}/api/want-to-find" >"${temporary_dir}/want-to-find.json"
 curl --fail --silent --show-error --request POST --get \
     --data-urlencode "apiKey@${temporary_dir}/api-key-value" --data-urlencode 'pluginName=kover' \
     --resolve "${domain}:443:127.0.0.1" \
@@ -91,6 +95,7 @@ if [[ -z "${api_health}" || "${api_auth_status}" != "401" || "${login_status}" !
 fi
 if ! jq -e 'any(.[]; .name == "Books" and (.folders | index("/books")))' \
     "${temporary_dir}/libraries.json" >/dev/null \
+    || ! jq -e 'type == "array"' "${temporary_dir}/want-to-find.json" >/dev/null \
     || ! jq -e 'select(.username == "dkunin") | (.token | length > 0)' \
     "${temporary_dir}/plugin-auth.json" >/dev/null; then
     echo "Authenticated API, Kover login, or Books library verification failed." >&2
@@ -105,4 +110,4 @@ if [[ "${native_login_status}" != "401" ]] \
     exit 1
 fi
 
-printf 'Verified %s: Kunini OIDC, disabled native passwords, dkunin API/Kover auth, Books library, TLS, loopback listener, and read-only media mount.\n' "${domain}"
+printf 'Verified %s: Want To Find, Kunini OIDC, disabled native passwords, dkunin API/Kover auth, Books library, TLS, loopback listener, and read-only media mount.\n' "${domain}"

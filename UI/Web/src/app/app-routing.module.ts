@@ -49,6 +49,10 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/want-to-read-routing.module').then(m => m.routes)
       },
       {
+        path: 'want-to-find',
+        loadChildren: () => import('./_routes/want-to-find-routing.module').then(m => m.routes)
+      },
+      {
         path: 'home',
         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
       },

@@ -18,7 +18,7 @@ namespace Kavita.Database.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -3604,6 +3604,66 @@ namespace Kavita.Database.Migrations
                     b.ToTable("AppUserTableOfContent");
                 });
 
+            modelBuilder.Entity("Kavita.Models.Entities.User.AppUserWantToFind", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Authors")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CoverUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Isbn")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AppUserWantToFind");
+                });
+
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserWantToRead", b =>
                 {
                     b.Property<int>("Id")
@@ -4867,6 +4927,17 @@ namespace Kavita.Database.Migrations
                     b.Navigation("Series");
                 });
 
+            modelBuilder.Entity("Kavita.Models.Entities.User.AppUserWantToFind", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.User.AppUser", "AppUser")
+                        .WithMany("WantToFind")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserWantToRead", b =>
                 {
                     b.HasOne("Kavita.Models.Entities.User.AppUser", "AppUser")
@@ -5091,6 +5162,8 @@ namespace Kavita.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("UserRoles");
+
+                    b.Navigation("WantToFind");
 
                     b.Navigation("WantToRead");
                 });

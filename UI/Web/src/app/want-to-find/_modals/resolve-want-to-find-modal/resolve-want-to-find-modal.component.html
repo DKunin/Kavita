@@ -1,0 +1,33 @@
+<ng-container *transloco="let t; prefix: 'want-to-find'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('resolve-title', {title: item().title})}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+    <p>{{t('resolve-description')}}</p>
+    <label for="want-to-find-series" class="form-label">{{t('matched-series-label')}}</label>
+    <app-typeahead [config]="seriesConfig" (selectedData)="updateSeries($event)">
+      <ng-template #badgeItem let-option>
+        {{option.name}}
+      </ng-template>
+      <ng-template #optionItem let-option>
+        <div>{{option.name}}</div>
+        <small class="text-muted">{{option.libraryName}}</small>
+      </ng-template>
+    </app-typeahead>
+
+    <div class="form-check mt-3">
+      <input id="want-to-find-add-to-read" class="form-check-input" type="checkbox"
+             [formField]="formGroup.addToWantToRead">
+      <label for="want-to-find-add-to-read" class="form-check-label">{{t('add-to-want-to-read-label')}}</label>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="selectedSeriesId() === null" (click)="resolve()">
+      {{t('mark-found')}}
+    </button>
+  </div>
+</ng-container>

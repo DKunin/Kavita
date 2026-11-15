@@ -32,6 +32,7 @@ using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SideNav;
 using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Theme;
+using Kavita.Models.DTOs.WantToFind;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
@@ -62,6 +63,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserCollection, AppUserCollectionDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
+        CreateMap<AppUserWantToFind, WantToFindDto>();
         CreateMap<Person, PersonDto>()
             .ForMember(dest => dest.Aliases, opt => opt.MapFrom(src => src.Aliases.Select(s => s.Alias)));
         CreateMap<Genre, GenreTagDto>();

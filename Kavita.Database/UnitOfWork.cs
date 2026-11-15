@@ -51,6 +51,7 @@ public class UnitOfWork : IUnitOfWork
         ClientDeviceRepository = new ClientDeviceRepository(_context, mapper);
         RemapRuleRepository = new ReadingListRemapRuleRepository(_context, mapper);
         KavitaPlusAuditRepository = new KavitaPlusAuditRepository(_context);
+        WantToFindRepository = new WantToFindRepository(_context, mapper);
     }
 
     /// <summary>
@@ -87,6 +88,7 @@ public class UnitOfWork : IUnitOfWork
     public IClientDeviceRepository ClientDeviceRepository { get; }
     public IReadingListRemapRuleRepository RemapRuleRepository { get; }
     public IKavitaPlusAuditRepository KavitaPlusAuditRepository { get; }
+    public IWantToFindRepository WantToFindRepository { get; }
 
     /// <summary>
     /// Commits pending changes inside an IMMEDIATE SQLite transaction so writer contention

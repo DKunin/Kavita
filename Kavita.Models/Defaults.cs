@@ -379,37 +379,44 @@ public static class Defaults
     [
         new()
     {
+        Name = "want-to-find",
+        StreamType = SideNavStreamType.WantToFind,
+        Order = 1,
+        IsProvided = true,
+        Visible = true
+    }, new()
+    {
         Name = "want-to-read",
         StreamType = SideNavStreamType.WantToRead,
-        Order = 1,
+        Order = 2,
         IsProvided = true,
         Visible = true
     }, new()
     {
         Name = "collections",
         StreamType = SideNavStreamType.Collections,
-        Order = 2,
+        Order = 3,
         IsProvided = true,
         Visible = true
     }, new()
     {
         Name = "reading-lists",
         StreamType = SideNavStreamType.ReadingLists,
-        Order = 3,
+        Order = 4,
         IsProvided = true,
         Visible = true
     }, new()
     {
         Name = "bookmarks",
         StreamType = SideNavStreamType.Bookmarks,
-        Order = 4,
+        Order = 5,
         IsProvided = true,
         Visible = true
     }, new()
     {
         Name = "all-series",
         StreamType = SideNavStreamType.AllSeries,
-        Order = 5,
+        Order = 6,
         IsProvided = true,
         Visible = true
     },
@@ -417,7 +424,7 @@ public static class Defaults
     {
         Name = "browse-authors",
         StreamType = SideNavStreamType.BrowsePeople,
-        Order = 6,
+        Order = 7,
         IsProvided = true,
         Visible = true
     }
