@@ -7,7 +7,7 @@ repo_dir="$(git -C "${app_dir}" rev-parse --show-toplevel)"
 expected_revision="$(git -C "${repo_dir}" rev-parse HEAD)"
 short_revision="$(git -C "${repo_dir}" rev-parse --short=12 HEAD)"
 expected_image="${KAVITA_IMAGE:-kavita-kunini:${short_revision}}"
-expected_ui_source="v0.9.1.4"
+expected_upstream_ui_source="v0.9.1.4"
 password_file="/var/apps/kavita/secrets/admin-password"
 api_key_file="/var/apps/kavita/secrets/dkunin-kover-api-key"
 temporary_dir="$(mktemp -d)"
@@ -30,7 +30,9 @@ if [[ "${health}" != "healthy" || "${published_port}" != "127.0.0.1:5000" \
     exit 1
 fi
 if [[ "${expected_image}" == kavita-kunini:* ]]; then
-    if [[ "${configured_revision}" != "${expected_revision}" || "${configured_ui_source}" != "${expected_ui_source}" ]]; then
+    if [[ "${configured_revision}" != "${expected_revision}" \
+        || ( "${configured_ui_source}" != "${expected_upstream_ui_source}" \
+            && "${configured_ui_source}" != "${expected_revision}" ) ]]; then
         echo "The running UI image does not match the deployed Git revision or compatible UI source." >&2
         exit 1
     fi
