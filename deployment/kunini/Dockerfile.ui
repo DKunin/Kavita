@@ -8,13 +8,17 @@ RUN npm ci --legacy-peer-deps
 COPY . ./
 RUN npm run prod
 
-FROM jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
+ARG KAVITA_RUNTIME_IMAGE=jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
+FROM ${KAVITA_RUNTIME_IMAGE}
 
 ARG SOURCE_REVISION=unknown
 ARG UI_SOURCE_REF=unknown
+ARG KAVITA_RUNTIME_IMAGE
+ARG FEATURE_BASE_REVISION=upstream
 LABEL org.opencontainers.image.revision="${SOURCE_REVISION}" \
-      org.opencontainers.image.base.name="jvmilazz0/kavita:0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a" \
-      ru.kunini.kavita.ui-source="${UI_SOURCE_REF}"
+      org.opencontainers.image.base.name="${KAVITA_RUNTIME_IMAGE}" \
+      ru.kunini.kavita.ui-source="${UI_SOURCE_REF}" \
+      ru.kunini.kavita.feature-base="${FEATURE_BASE_REVISION}"
 
 RUN rm -rf /kavita/wwwroot/*
 COPY --from=ui-build --chown=1000:1000 /src/dist/browser/ /kavita/wwwroot/

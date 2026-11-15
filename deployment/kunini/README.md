@@ -114,6 +114,16 @@ image="kavita-kunini:$(git rev-parse --short=12 HEAD)"
 docker save "${image}" | gzip | ssh <production-host> 'gunzip | docker load'
 ```
 
+Если UI меняется поверх уже развёрнутого feature-образа с дополнительным
+backend-контрактом, новый образ собирается из чистого `UI/Web` текущего коммита
+поверх этого образа. Скрипт проверяет чистоту исходников и сохраняет SHA базового
+feature-образа в OCI label:
+
+```bash
+KAVITA_BASE_IMAGE='kavita-kunini:<предыдущий-sha>' \
+  ./deployment/kunini/build-current-ui-image.sh
+```
+
 На сервере используется sparse checkout репозитория. После загрузки образа:
 
 ```bash

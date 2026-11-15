@@ -18,70 +18,98 @@
       <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
     </app-empty-state>
   } @else {
-    <div class="wishlist-grid py-3">
-      @for (item of items(); track item.id) {
-        <article class="wishlist-card card">
-          <div class="cover" [class.placeholder]="!item.coverUrl || failedCovers().has(item.id)">
-            @if (item.coverUrl && !failedCovers().has(item.id)) {
-              <img [src]="item.coverUrl" [alt]="t('cover-alt', {title: item.title})" (error)="coverFailed(item.id)">
+    <app-card-detail-layout
+      [items]="items()"
+      [isLoading]="false"
+      [trackByIdentity]="trackByIdentity"
+      [customSort]="true"
+    >
+      <ng-template #cardItem let-item>
+        <article class="want-card card-item-container card position-relative" [attr.aria-label]="item.title">
+          <div
+            class="overlay"
+            [class.is-actionable]="!isReadOnly()"
+            [attr.role]="isReadOnly() ? null : 'button'"
+            [attr.tabindex]="isReadOnly() ? null : 0"
+            (click)="openItem(item)"
+            (keydown.enter)="openItem(item)"
+          >
+            @if (item.coverUrl) {
+              <app-image
+                [imageUrl]="item.coverUrl"
+                [width]="'var(--card-image-width)'"
+                [height]="'var(--card-image-height)'"
+                [objectFit]="'cover'"
+                [styles]="{'border-radius': '.25rem .25rem 0 0'}"
+              />
             } @else {
-              <i class="fa-solid fa-book" aria-hidden="true"></i>
+              <div class="cover-placeholder">
+                <i class="fa-solid fa-book" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('cover-alt', {title: item.title})}}</span>
+              </div>
+            }
+
+            <div class="card-overlay"></div>
+
+            @if (!isReadOnly()) {
+              <div class="overlay-information" aria-hidden="true">
+                <div class="overlay-information--centered">
+                  <span class="card-title">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i>
+                  </span>
+                </div>
+              </div>
             }
           </div>
 
-          <div class="card-body d-flex flex-column">
-            <div class="d-flex justify-content-between gap-2">
-              <div>
-                <h5 class="card-title mb-1">{{item.title}}</h5>
-                @if (item.authors) {
-                  <div class="text-muted mb-2">{{item.authors}}</div>
-                }
-              </div>
-              @if (!isReadOnly()) {
-                <div class="dropdown-actions d-flex gap-1">
-                  <button type="button" class="btn btn-icon" [attr.aria-label]="t('edit')" (click)="edit(item)">
-                    <i class="fa fa-pen" aria-hidden="true"></i>
+          @if (item.authors) {
+            <div class="card-body meta-title">
+              <div class="card-content text-center">{{item.authors}}</div>
+            </div>
+          }
+
+          <div class="card-title-container">
+            <span class="card-title" [title]="item.title">{{item.title}}</span>
+
+            @if (!isReadOnly() || item.sourceUrl) {
+              <span class="card-actions">
+                <div ngbDropdown container="body" placement="bottom-end" class="d-inline-block">
+                  <button
+                    type="button"
+                    class="btn btn-icon dropdown-toggle"
+                    ngbDropdownToggle
+                    [id]="'want-to-find-actions-' + item.id"
+                    [attr.aria-label]="item.title"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                   </button>
-                  <button type="button" class="btn btn-icon text-danger" [attr.aria-label]="t('delete')" (click)="delete(item)">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                  </button>
+                  <div ngbDropdownMenu [attr.aria-labelledby]="'want-to-find-actions-' + item.id">
+                    @if (!isReadOnly()) {
+                      <button ngbDropdownItem type="button" (click)="markFound(item)">
+                        <i class="fa-solid fa-check me-2" aria-hidden="true"></i>{{t('mark-found')}}
+                      </button>
+                      <button ngbDropdownItem type="button" (click)="edit(item)">
+                        <i class="fa fa-pen me-2" aria-hidden="true"></i>{{t('edit')}}
+                      </button>
+                    }
+                    @if (item.sourceUrl) {
+                      <a ngbDropdownItem [href]="item.sourceUrl" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>{{t('open-source')}}
+                      </a>
+                    }
+                    @if (!isReadOnly()) {
+                      <button ngbDropdownItem type="button" class="text-danger" (click)="delete(item)">
+                        <i class="fa fa-trash me-2" aria-hidden="true"></i>{{t('delete')}}
+                      </button>
+                    }
+                  </div>
                 </div>
-              }
-            </div>
-
-            @if (item.summary) {
-              <p class="summary">{{item.summary}}</p>
+              </span>
             }
-
-            <dl class="metadata small mb-2">
-              @if (item.isbn) {
-                <div><dt>{{t('isbn-label')}}</dt><dd>{{item.isbn}}</dd></div>
-              }
-              @if (item.externalId) {
-                <div><dt>{{t('external-id-label')}}</dt><dd>{{item.externalId}}</dd></div>
-              }
-              <div><dt>{{t('added-label')}}</dt><dd>{{item.createdUtc | date:'mediumDate'}}</dd></div>
-            </dl>
-
-            @if (item.notes) {
-              <p class="notes small"><strong>{{t('notes-label')}}:</strong> {{item.notes}}</p>
-            }
-
-            <div class="mt-auto d-flex flex-wrap gap-2 align-items-center">
-              @if (!isReadOnly()) {
-                <button type="button" class="btn btn-primary" (click)="markFound(item)">
-                  <i class="fa-solid fa-check me-1" aria-hidden="true"></i>{{t('mark-found')}}
-                </button>
-              }
-              @if (item.sourceUrl) {
-                <a class="btn btn-outline-secondary" [href]="item.sourceUrl" target="_blank" rel="noopener noreferrer">
-                  {{t('open-source')}}<i class="fa-solid fa-arrow-up-right-from-square ms-1" aria-hidden="true"></i>
-                </a>
-              }
-            </div>
           </div>
         </article>
-      }
-    </div>
+      </ng-template>
+    </app-card-detail-layout>
   }
 </div>
