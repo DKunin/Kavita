@@ -115,9 +115,9 @@ docker save "${image}" | gzip | ssh <production-host> 'gunzip | docker load'
 ```
 
 Если UI меняется поверх уже развёрнутого feature-образа с дополнительным
-backend-контрактом, новый образ собирается из чистого `UI/Web` текущего коммита
-поверх этого образа. Скрипт проверяет чистоту исходников и сохраняет SHA базового
-feature-образа в OCI label:
+backend-контрактом, новый образ собирается из совместимого `v0.9.1.4`, базового
+Ink-патча и `ui-want-to-find-v0.9.1.4.patch`. Скрипт проверяет чистоту deployment-
+артефактов и сохраняет SHA базового feature-образа в OCI label:
 
 ```bash
 KAVITA_BASE_IMAGE='kavita-kunini:<предыдущий-sha>' \

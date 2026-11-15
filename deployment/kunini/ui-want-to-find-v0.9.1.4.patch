@@ -1,0 +1,784 @@
+diff --git a/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts b/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts
+index 2d6ef4e4c..87308538c 100644
+--- a/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts
++++ b/UI/Web/src/app/_models/sidenav/sidenav-stream-type.enum.ts
+@@ -7,5 +7,6 @@ export enum SideNavStreamType {
+   ExternalSource = 6,
+   AllSeries = 7,
+   WantToRead = 8,
+-  BrowseAuthors = 9
++  BrowseAuthors = 9,
++  WantToFind = 10
+ }
+diff --git a/UI/Web/src/app/_models/want-to-find/want-to-find.ts b/UI/Web/src/app/_models/want-to-find/want-to-find.ts
+new file mode 100644
+index 000000000..140a66c10
+--- /dev/null
++++ b/UI/Web/src/app/_models/want-to-find/want-to-find.ts
+@@ -0,0 +1,15 @@
++export interface WantToFind {
++  id: number;
++  title: string;
++  authors: string;
++  summary?: string;
++  isbn?: string;
++  externalId?: string;
++  coverUrl?: string;
++  sourceUrl?: string;
++  notes?: string;
++  createdUtc: string;
++  lastModifiedUtc: string;
++}
++
++export type UpsertWantToFind = Omit<WantToFind, 'createdUtc' | 'lastModifiedUtc'>;
+diff --git a/UI/Web/src/app/_routes/want-to-find-routing.module.ts b/UI/Web/src/app/_routes/want-to-find-routing.module.ts
+new file mode 100644
+index 000000000..6a9eeadae
+--- /dev/null
++++ b/UI/Web/src/app/_routes/want-to-find-routing.module.ts
+@@ -0,0 +1,10 @@
++import {Routes} from '@angular/router';
++
++export const routes: Routes = [
++  {
++    path: '',
++    pathMatch: 'full',
++    title: 'title.want-to-find',
++    loadComponent: () => import('../want-to-find/want-to-find.component').then(c => c.WantToFindComponent)
++  }
++];
+diff --git a/UI/Web/src/app/_services/want-to-find.service.ts b/UI/Web/src/app/_services/want-to-find.service.ts
+new file mode 100644
+index 000000000..97723958e
+--- /dev/null
++++ b/UI/Web/src/app/_services/want-to-find.service.ts
+@@ -0,0 +1,30 @@
++import {inject, Injectable} from '@angular/core';
++import {HttpClient} from '@angular/common/http';
++import {environment} from '../../environments/environment';
++import {UpsertWantToFind, WantToFind} from '../_models/want-to-find/want-to-find';
++
++@Injectable({providedIn: 'root'})
++export class WantToFindService {
++  private readonly httpClient = inject(HttpClient);
++  private readonly baseUrl = environment.apiUrl + 'want-to-find';
++
++  getAll() {
++    return this.httpClient.get<WantToFind[]>(this.baseUrl);
++  }
++
++  create(item: UpsertWantToFind) {
++    return this.httpClient.post<WantToFind>(this.baseUrl + '/create', item);
++  }
++
++  update(item: UpsertWantToFind) {
++    return this.httpClient.post<WantToFind>(this.baseUrl + '/update', item);
++  }
++
++  delete(id: number) {
++    return this.httpClient.delete<void>(this.baseUrl + '?wantToFindId=' + id);
++  }
++
++  resolve(wantToFindId: number, seriesId: number, addToWantToRead: boolean) {
++    return this.httpClient.post<void>(this.baseUrl + '/resolve', {wantToFindId, seriesId, addToWantToRead});
++  }
++}
+diff --git a/UI/Web/src/app/app-routing.module.ts b/UI/Web/src/app/app-routing.module.ts
+index 6f3057676..862a55630 100644
+--- a/UI/Web/src/app/app-routing.module.ts
++++ b/UI/Web/src/app/app-routing.module.ts
+@@ -48,6 +48,10 @@ export const routes: Routes = [
+         path: 'want-to-read',
+         loadChildren: () => import('./_routes/want-to-read-routing.module').then(m => m.routes)
+       },
++      {
++        path: 'want-to-find',
++        loadChildren: () => import('./_routes/want-to-find-routing.module').then(m => m.routes)
++      },
+       {
+         path: 'home',
+         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
+diff --git a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
+index 777f9eea4..79093796a 100644
+--- a/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
++++ b/UI/Web/src/app/sidenav/_components/side-nav/side-nav.component.html
+@@ -83,6 +83,12 @@
+                                    [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/" />
+               }
+ 
++              @case (SideNavStreamType.WantToFind) {
++                <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
++                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode"
++                                   icon="fa-magnifying-glass" [title]="t('want-to-find')" link="/want-to-find/" />
++              }
++
+               @case (SideNavStreamType.BrowseAuthors) {
+                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
+                                    [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-users" [title]="t('browse-people')" link="/browse/people/" />
+diff --git a/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.html b/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.html
+new file mode 100644
+index 000000000..855e983b9
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.html
+@@ -0,0 +1,65 @@
++<ng-container *transloco="let t; prefix: 'want-to-find'">
++  <div class="modal-header">
++    <h4 class="modal-title">{{t(item() ? 'edit-title' : 'create-title')}}</h4>
++    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
++  </div>
++
++  <div class="modal-body">
++    <form [formGroup]="formGroup">
++    <div class="mb-3">
++      <label for="want-to-find-title" class="form-label">{{t('title-label')}}</label>
++      <input id="want-to-find-title" class="form-control" type="text"
++             formControlName="title" [appFormField]="formGroup.controls.title">
++      <app-validation-errors inputId="want-to-find-title" [control]="formGroup.controls.title" />
++    </div>
++
++    <div class="mb-3">
++      <label for="want-to-find-authors" class="form-label">{{t('authors-label')}}</label>
++      <input id="want-to-find-authors" class="form-control" type="text"
++             formControlName="authors" [appFormField]="formGroup.controls.authors">
++    </div>
++
++    <div class="row g-3 mb-3">
++      <div class="col-md-6">
++        <label for="want-to-find-isbn" class="form-label">{{t('isbn-label')}}</label>
++        <input id="want-to-find-isbn" class="form-control" type="text"
++               formControlName="isbn" [appFormField]="formGroup.controls.isbn">
++      </div>
++      <div class="col-md-6">
++        <label for="want-to-find-external-id" class="form-label">{{t('external-id-label')}}</label>
++        <input id="want-to-find-external-id" class="form-control" type="text"
++               formControlName="externalId" [appFormField]="formGroup.controls.externalId">
++      </div>
++    </div>
++
++    <div class="mb-3">
++      <label for="want-to-find-summary" class="form-label">{{t('summary-label')}}</label>
++      <textarea id="want-to-find-summary" class="form-control" rows="3"
++                formControlName="summary" [appFormField]="formGroup.controls.summary"></textarea>
++    </div>
++
++    <div class="mb-3">
++      <label for="want-to-find-cover" class="form-label">{{t('cover-url-label')}}</label>
++      <input id="want-to-find-cover" class="form-control" type="url"
++             placeholder="https://" formControlName="coverUrl" [appFormField]="formGroup.controls.coverUrl">
++    </div>
++
++    <div class="mb-3">
++      <label for="want-to-find-source" class="form-label">{{t('source-url-label')}}</label>
++      <input id="want-to-find-source" class="form-control" type="url"
++             placeholder="https://" formControlName="sourceUrl" [appFormField]="formGroup.controls.sourceUrl">
++    </div>
++
++    <div class="mb-1">
++      <label for="want-to-find-notes" class="form-label">{{t('notes-label')}}</label>
++      <textarea id="want-to-find-notes" class="form-control" rows="3"
++                formControlName="notes" [appFormField]="formGroup.controls.notes"></textarea>
++    </div>
++    </form>
++  </div>
++
++  <div class="modal-footer">
++    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
++    <button type="button" class="btn btn-primary" [disabled]="formGroup.invalid" (click)="save()">{{t('save')}}</button>
++  </div>
++</ng-container>
+diff --git a/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.ts b/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.ts
+new file mode 100644
+index 000000000..32a667231
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/_modals/edit-want-to-find-modal/edit-want-to-find-modal.component.ts
+@@ -0,0 +1,66 @@
++import {ChangeDetectionStrategy, Component, inject, input, OnInit} from '@angular/core';
++import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
++import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
++import {translate, TranslocoDirective} from '@jsverse/transloco';
++import {ToastrService} from '@openng/ngx-toastr';
++import {WantToFind} from '../../../_models/want-to-find/want-to-find';
++import {WantToFindService} from '../../../_services/want-to-find.service';
++import {FormFieldDirective} from '../../../_directives/form-field.directive';
++import {ValidationErrorsComponent} from '../../../shared/_components/validation-errors/validation-errors.component';
++import {modalSaved} from '../../../_models/modal/modal-result';
++
++@Component({
++  selector: 'app-edit-want-to-find-modal',
++  templateUrl: './edit-want-to-find-modal.component.html',
++  changeDetection: ChangeDetectionStrategy.OnPush,
++  imports: [TranslocoDirective, ReactiveFormsModule, FormFieldDirective, ValidationErrorsComponent]
++})
++export class EditWantToFindModalComponent implements OnInit {
++  private readonly activeModal = inject(NgbActiveModal);
++  private readonly service = inject(WantToFindService);
++  private readonly toastr = inject(ToastrService);
++
++  item = input<WantToFind | null>(null);
++
++  formGroup = new FormGroup({
++    title: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.maxLength(256)]}),
++    authors: new FormControl('', {nonNullable: true, validators: [Validators.maxLength(1024)]}),
++    summary: new FormControl('', {nonNullable: true}),
++    isbn: new FormControl('', {nonNullable: true, validators: [Validators.maxLength(64)]}),
++    externalId: new FormControl('', {nonNullable: true, validators: [Validators.maxLength(256)]}),
++    coverUrl: new FormControl('', {nonNullable: true, validators: [Validators.maxLength(2048)]}),
++    sourceUrl: new FormControl('', {nonNullable: true, validators: [Validators.maxLength(2048)]}),
++    notes: new FormControl('', {nonNullable: true})
++  });
++
++  ngOnInit() {
++    const item = this.item();
++    if (!item) return;
++
++    this.formGroup.setValue({
++      title: item.title,
++      authors: item.authors,
++      summary: item.summary ?? '',
++      isbn: item.isbn ?? '',
++      externalId: item.externalId ?? '',
++      coverUrl: item.coverUrl ?? '',
++      sourceUrl: item.sourceUrl ?? '',
++      notes: item.notes ?? ''
++    });
++  }
++
++  close() {
++    this.activeModal.dismiss();
++  }
++
++  save() {
++    if (this.formGroup.invalid) return;
++
++    const request = {...this.formGroup.getRawValue(), id: this.item()?.id ?? 0};
++    const operation = this.item() ? this.service.update(request) : this.service.create(request);
++    operation.subscribe(saved => {
++      this.toastr.success(translate(this.item() ? 'want-to-find.updated' : 'want-to-find.created'));
++      this.activeModal.close(modalSaved(saved));
++    });
++  }
++}
+diff --git a/UI/Web/src/app/want-to-find/_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component.html b/UI/Web/src/app/want-to-find/_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component.html
+new file mode 100644
+index 000000000..30d59b1f4
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component.html
+@@ -0,0 +1,33 @@
++<ng-container *transloco="let t; prefix: 'want-to-find'">
++  <div class="modal-header">
++    <h4 class="modal-title">{{t('resolve-title', {title: item().title})}}</h4>
++    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
++  </div>
++
++  <div class="modal-body">
++    <p>{{t('resolve-description')}}</p>
++    <label for="want-to-find-series" class="form-label">{{t('matched-series-label')}}</label>
++    <app-typeahead [settings]="seriesSettings" (selectedData)="updateSeries($event)">
++      <ng-template #badgeItem let-option>
++        {{option.name}}
++      </ng-template>
++      <ng-template #optionItem let-option>
++        <div>{{option.name}}</div>
++        <small class="text-muted">{{option.libraryName}}</small>
++      </ng-template>
++    </app-typeahead>
++
++    <div class="form-check mt-3">
++      <input id="want-to-find-add-to-read" class="form-check-input" type="checkbox"
++             [formControl]="addToWantToRead">
++      <label for="want-to-find-add-to-read" class="form-check-label">{{t('add-to-want-to-read-label')}}</label>
++    </div>
++  </div>
++
++  <div class="modal-footer">
++    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
++    <button type="button" class="btn btn-primary" [disabled]="selectedSeriesId() === null" (click)="resolve()">
++      {{t('mark-found')}}
++    </button>
++  </div>
++</ng-container>
+diff --git a/UI/Web/src/app/want-to-find/_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component.ts b/UI/Web/src/app/want-to-find/_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component.ts
+new file mode 100644
+index 000000000..01c5c0840
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component.ts
+@@ -0,0 +1,49 @@
++import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
++import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
++import {FormControl, ReactiveFormsModule} from '@angular/forms';
++import {TranslocoDirective} from '@jsverse/transloco';
++import {WantToFind} from '../../../_models/want-to-find/want-to-find';
++import {WantToFindService} from '../../../_services/want-to-find.service';
++import {TypeaheadSettingsFactoryService} from '../../../typeahead-settings-factory.service';
++import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
++import {SearchResult} from '../../../_models/search/search-result';
++import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.component';
++import {modalSaved} from '../../../_models/modal/modal-result';
++
++@Component({
++  selector: 'app-resolve-want-to-find-modal',
++  templateUrl: './resolve-want-to-find-modal.component.html',
++  changeDetection: ChangeDetectionStrategy.OnPush,
++  imports: [TranslocoDirective, TypeaheadComponent, ReactiveFormsModule]
++})
++export class ResolveWantToFindModalComponent {
++  private readonly activeModal = inject(NgbActiveModal);
++  private readonly service = inject(WantToFindService);
++  private readonly typeaheadFactory = inject(TypeaheadSettingsFactoryService);
++
++  item = input.required<WantToFind>();
++  selectedSeriesId = signal<number | null>(null);
++  addToWantToRead = new FormControl(true, {nonNullable: true});
++
++  seriesSettings: TypeaheadSettings<SearchResult> = this.typeaheadFactory.forSearchResult({
++    id: 'want-to-find-series',
++    overrides: {minCharacters: 0}
++  });
++
++  updateSeries(results: SearchResult[]) {
++    this.selectedSeriesId.set(results[0]?.seriesId ?? null);
++  }
++
++  close() {
++    this.activeModal.dismiss();
++  }
++
++  resolve() {
++    const seriesId = this.selectedSeriesId();
++    if (seriesId === null) return;
++
++    this.service.resolve(this.item().id, seriesId, this.addToWantToRead.value).subscribe(() => {
++      this.activeModal.close(modalSaved(this.item()));
++    });
++  }
++}
+diff --git a/UI/Web/src/app/want-to-find/want-to-find.component.html b/UI/Web/src/app/want-to-find/want-to-find.component.html
+new file mode 100644
+index 000000000..7af39d808
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/want-to-find.component.html
+@@ -0,0 +1,115 @@
++<div class="main-container container-fluid" *transloco="let t; prefix: 'want-to-find'">
++  <app-side-nav-companion-bar>
++    <ng-container title>
++      <h4>{{t('page-title')}}</h4>
++    </ng-container>
++    <span subtitle>{{t('item-count', {count: items().length})}}</span>
++    @if (!isReadOnly()) {
++      <button main type="button" class="btn btn-primary" (click)="add()">
++        <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add')}}
++      </button>
++    }
++  </app-side-nav-companion-bar>
++
++  @if (isLoading()) {
++    <app-loading />
++  } @else if (items().length === 0) {
++    <app-empty-state titleKey="empty-title" descriptionKey="empty-description" i18nPrefix="want-to-find">
++      <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
++    </app-empty-state>
++  } @else {
++    <app-card-detail-layout
++      [items]="items()"
++      [isLoading]="false"
++      [trackByIdentity]="trackByIdentity"
++      [customSort]="true"
++    >
++      <ng-template #cardItem let-item>
++        <article class="want-card card-item-container card position-relative" [attr.aria-label]="item.title">
++          <div
++            class="overlay"
++            [class.is-actionable]="!isReadOnly()"
++            [attr.role]="isReadOnly() ? null : 'button'"
++            [attr.tabindex]="isReadOnly() ? null : 0"
++            (click)="openItem(item)"
++            (keydown.enter)="openItem(item)"
++          >
++            @if (item.coverUrl) {
++              <app-image
++                [imageUrl]="item.coverUrl"
++                [width]="'var(--card-image-width)'"
++                [height]="'var(--card-image-height)'"
++                [objectFit]="'cover'"
++                [styles]="{'border-radius': '.25rem .25rem 0 0'}"
++              />
++            } @else {
++              <div class="cover-placeholder">
++                <i class="fa-solid fa-book" aria-hidden="true"></i>
++                <span class="visually-hidden">{{t('cover-alt', {title: item.title})}}</span>
++              </div>
++            }
++
++            <div class="card-overlay"></div>
++
++            @if (!isReadOnly()) {
++              <div class="overlay-information" aria-hidden="true">
++                <div class="overlay-information--centered">
++                  <span class="card-title">
++                    <i class="fa-solid fa-check" aria-hidden="true"></i>
++                  </span>
++                </div>
++              </div>
++            }
++          </div>
++
++          @if (item.authors) {
++            <div class="card-body meta-title">
++              <div class="card-content text-center">{{item.authors}}</div>
++            </div>
++          }
++
++          <div class="card-title-container">
++            <span class="card-title" [title]="item.title">{{item.title}}</span>
++
++            @if (!isReadOnly() || item.sourceUrl) {
++              <span class="card-actions">
++                <div ngbDropdown container="body" placement="bottom-end" class="d-inline-block">
++                  <button
++                    type="button"
++                    class="btn btn-icon dropdown-toggle"
++                    ngbDropdownToggle
++                    [id]="'want-to-find-actions-' + item.id"
++                    [attr.aria-label]="item.title"
++                    (click)="$event.stopPropagation()"
++                  >
++                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
++                  </button>
++                  <div ngbDropdownMenu [attr.aria-labelledby]="'want-to-find-actions-' + item.id">
++                    @if (!isReadOnly()) {
++                      <button ngbDropdownItem type="button" (click)="markFound(item)">
++                        <i class="fa-solid fa-check me-2" aria-hidden="true"></i>{{t('mark-found')}}
++                      </button>
++                      <button ngbDropdownItem type="button" (click)="edit(item)">
++                        <i class="fa fa-pen me-2" aria-hidden="true"></i>{{t('edit')}}
++                      </button>
++                    }
++                    @if (item.sourceUrl) {
++                      <a ngbDropdownItem [href]="item.sourceUrl" target="_blank" rel="noopener noreferrer">
++                        <i class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>{{t('open-source')}}
++                      </a>
++                    }
++                    @if (!isReadOnly()) {
++                      <button ngbDropdownItem type="button" class="text-danger" (click)="delete(item)">
++                        <i class="fa fa-trash me-2" aria-hidden="true"></i>{{t('delete')}}
++                      </button>
++                    }
++                  </div>
++                </div>
++              </span>
++            }
++          </div>
++        </article>
++      </ng-template>
++    </app-card-detail-layout>
++  }
++</div>
+diff --git a/UI/Web/src/app/want-to-find/want-to-find.component.scss b/UI/Web/src/app/want-to-find/want-to-find.component.scss
+new file mode 100644
+index 000000000..1296bfe54
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/want-to-find.component.scss
+@@ -0,0 +1,65 @@
++.want-card {
++  width: var(--card-image-width);
++
++  .overlay {
++    position: relative;
++    overflow: hidden;
++
++    &.is-actionable {
++      cursor: pointer;
++    }
++  }
++
++  .cover-placeholder {
++    display: grid;
++    width: var(--card-image-width);
++    height: var(--card-image-height);
++    place-items: center;
++    border-radius: 0.25rem 0.25rem 0 0;
++    background: var(--card-bg-color);
++    color: var(--text-muted-color);
++    font-size: 2.5rem;
++  }
++
++  .card-title-container {
++    display: flex;
++    align-items: center;
++    justify-content: space-between;
++    padding-left: 0.3125rem;
++  }
++
++  .card-title-container > .card-title {
++    flex: 1;
++    min-width: 0;
++    max-width: none;
++    margin: 0;
++    font-size: 0.8rem;
++    text-align: center;
++  }
++
++  .card-actions {
++    min-width: 1.875rem;
++    flex-shrink: 0;
++  }
++
++  .dropdown-toggle::after {
++    content: none;
++  }
++
++  .overlay-information--centered .card-title {
++    display: grid;
++    width: 2rem;
++    height: 2rem;
++    place-items: center;
++    padding: 0;
++    color: white;
++  }
++
++  .meta-title .card-content {
++    display: -webkit-box;
++    overflow: hidden;
++    -webkit-box-orient: vertical;
++    -webkit-line-clamp: 2;
++    line-clamp: 2;
++  }
++}
+diff --git a/UI/Web/src/app/want-to-find/want-to-find.component.ts b/UI/Web/src/app/want-to-find/want-to-find.component.ts
+new file mode 100644
+index 000000000..91474328c
+--- /dev/null
++++ b/UI/Web/src/app/want-to-find/want-to-find.component.ts
+@@ -0,0 +1,91 @@
++import {ChangeDetectionStrategy, Component, inject, OnInit, signal, TrackByFunction} from '@angular/core';
++import {translate, TranslocoDirective} from '@jsverse/transloco';
++import {ToastrService} from '@openng/ngx-toastr';
++import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
++import {WantToFindService} from '../_services/want-to-find.service';
++import {WantToFind} from '../_models/want-to-find/want-to-find';
++import {SideNavCompanionBarComponent} from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
++import {EmptyStateComponent} from '../shared/_components/empty-state/empty-state.component';
++import {LoadingComponent} from '../shared/loading/loading.component';
++import {ConfirmService} from '../shared/confirm.service';
++import {ModalService} from '../_services/modal.service';
++import {EditWantToFindModalComponent} from './_modals/edit-want-to-find-modal/edit-want-to-find-modal.component';
++import {ResolveWantToFindModalComponent} from './_modals/resolve-want-to-find-modal/resolve-want-to-find-modal.component';
++import {ModalResult} from '../_models/modal/modal-result';
++import {AccountService} from '../_services/account.service';
++import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
++import {ImageComponent} from '../shared/image/image.component';
++
++@Component({
++  selector: 'app-want-to-find',
++  templateUrl: './want-to-find.component.html',
++  styleUrl: './want-to-find.component.scss',
++  changeDetection: ChangeDetectionStrategy.OnPush,
++  imports: [
++    TranslocoDirective, SideNavCompanionBarComponent, EmptyStateComponent, LoadingComponent,
++    CardDetailLayoutComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem
++  ]
++})
++export class WantToFindComponent implements OnInit {
++  private readonly service = inject(WantToFindService);
++  private readonly confirmService = inject(ConfirmService);
++  private readonly modalService = inject(ModalService);
++  private readonly toastr = inject(ToastrService);
++  private readonly accountService = inject(AccountService);
++
++  items = signal<WantToFind[]>([]);
++  isLoading = signal(true);
++  isReadOnly = this.accountService.hasReadOnlyRole;
++  trackByIdentity: TrackByFunction<WantToFind> = (_, item) => item.id;
++
++  ngOnInit() {
++    this.load();
++  }
++
++  load() {
++    this.isLoading.set(true);
++    this.service.getAll().subscribe(items => {
++      this.items.set(items);
++      this.isLoading.set(false);
++    });
++  }
++
++  add() {
++    this.openEditor(null);
++  }
++
++  edit(item: WantToFind) {
++    this.openEditor(item);
++  }
++
++  openItem(item: WantToFind) {
++    if (this.isReadOnly()) return;
++    this.markFound(item);
++  }
++
++  markFound(item: WantToFind) {
++    const ref = this.modalService.open(ResolveWantToFindModalComponent);
++    ref.setInput('item', item);
++    ref.closed.subscribe(() => {
++      this.items.update(items => items.filter(i => i.id !== item.id));
++      this.toastr.success(translate('want-to-find.resolved'));
++    });
++  }
++
++  async delete(item: WantToFind) {
++    if (!await this.confirmService.confirm(translate('want-to-find.delete-confirm', {title: item.title}))) return;
++    this.service.delete(item.id).subscribe(() => {
++      this.items.update(items => items.filter(i => i.id !== item.id));
++      this.toastr.success(translate('want-to-find.deleted'));
++    });
++  }
++
++  private openEditor(item: WantToFind | null) {
++    const ref = this.modalService.open(EditWantToFindModalComponent, {size: 'lg'});
++    ref.setInput('item', item);
++    ref.closed.subscribe((result: ModalResult<WantToFind>) => {
++      if (!result.data) return;
++      this.load();
++    });
++  }
++}
+diff --git a/UI/Web/src/assets/langs/en.json b/UI/Web/src/assets/langs/en.json
+index 24997fcb5..4672e5e71 100644
+--- a/UI/Web/src/assets/langs/en.json
++++ b/UI/Web/src/assets/langs/en.json
+@@ -6,6 +6,7 @@
+         "collections": "Collections",
+         "browse-genres": "Browse Genres",
+         "browse-tags": "Browse Tags",
++        "want-to-find": "Want To Find",
+         "want-to-read": "Want To Read",
+         "reading-lists": "Reading Lists",
+         "settings": "Settings",
+@@ -232,6 +233,42 @@
+         "no-items-filtered": "No items match your current filter."
+     },
+ 
++    "want-to-find": {
++        "page-title": "Want To Find",
++        "item-count": "{{count}} wanted titles",
++        "add": "Add title",
++        "empty-title": "Nothing to find yet",
++        "empty-description": "Add metadata for books you want to acquire. These entries stay outside your libraries and collections.",
++        "create-title": "Add wanted title",
++        "edit-title": "Edit wanted title",
++        "resolve-title": "Found {{title}}",
++        "resolve-description": "Match this metadata-only entry to a series already in your library. The entry will then be removed from Want To Find.",
++        "matched-series-label": "Library series",
++        "add-to-want-to-read-label": "Add the matched series to Want To Read",
++        "title-label": "Title",
++        "authors-label": "Authors",
++        "summary-label": "Summary",
++        "isbn-label": "ISBN",
++        "external-id-label": "External ID",
++        "cover-url-label": "Cover URL",
++        "source-url-label": "Source URL",
++        "notes-label": "Notes",
++        "added-label": "Added",
++        "mark-found": "Mark found",
++        "open-source": "Open source",
++        "cover-alt": "Cover for {{title}}",
++        "edit": "Edit",
++        "delete": "Delete",
++        "delete-confirm": "Delete {{title}} from Want To Find?",
++        "close": "Close",
++        "cancel": "Cancel",
++        "save": "Save",
++        "created": "Added to Want To Find",
++        "updated": "Want To Find entry updated",
++        "deleted": "Removed from Want To Find",
++        "resolved": "Matched title removed from Want To Find"
++    },
++
+     "user-preferences": {
+         "title": "User Dashboard",
+         "pref-description": "These are global settings that are bound to your account. Reader settings are located in Reading Profiles.",
+@@ -1930,6 +1967,7 @@
+         "home": "Home",
+         "continue-reading": "Continue Reading",
+         "settings": "Settings",
++        "want-to-find": "Want To Find",
+         "want-to-read": "Want To Read",
+         "collections": "Collections",
+         "reading-lists": "Reading Lists",
+@@ -4133,6 +4171,7 @@
+         "recently-updated": "{{dashboard.recently-updated-title}}",
+         "newly-added": "{{dashboard.recently-added-title}}",
+         "more-in-genre": "{{dashboard.more-in-genre-title}}",
++        "want-to-find": "{{side-nav.want-to-find}}",
+         "want-to-read": "{{side-nav.want-to-read}}",
+         "collections": "{{side-nav.collections}}",
+         "reading-lists": "{{side-nav.reading-lists}}",
+diff --git a/UI/Web/src/assets/langs/ru.json b/UI/Web/src/assets/langs/ru.json
+index e35dd6f5c..034b44f9c 100644
+--- a/UI/Web/src/assets/langs/ru.json
++++ b/UI/Web/src/assets/langs/ru.json
+@@ -64,6 +64,41 @@
+         "no-items": "Нет ни одного элемента. Попробуйте добавить произведение.",
+         "no-items-filtered": "Ни один элемент не соответствует текущему фильтру."
+     },
++    "want-to-find": {
++        "page-title": "Хочу найти",
++        "item-count": "К поиску: {{count}}",
++        "add": "Добавить книгу",
++        "empty-title": "Пока нечего искать",
++        "empty-description": "Добавьте метаданные книг, которые хотите найти. Эти записи не попадут в библиотеки и коллекции.",
++        "create-title": "Добавить книгу для поиска",
++        "edit-title": "Изменить данные книги",
++        "resolve-title": "Найдена книга «{{title}}»",
++        "resolve-description": "Свяжите запись только с метаданными с произведением из библиотеки. После этого запись будет удалена из списка «Хочу найти».",
++        "matched-series-label": "Произведение в библиотеке",
++        "add-to-want-to-read-label": "Добавить найденное произведение в «Хочу прочитать»",
++        "title-label": "Название",
++        "authors-label": "Авторы",
++        "summary-label": "Описание",
++        "isbn-label": "ISBN",
++        "external-id-label": "Внешний идентификатор",
++        "cover-url-label": "Ссылка на обложку",
++        "source-url-label": "Ссылка на источник",
++        "notes-label": "Заметки",
++        "added-label": "Добавлено",
++        "mark-found": "Отметить найденной",
++        "open-source": "Открыть источник",
++        "cover-alt": "Обложка книги «{{title}}»",
++        "edit": "Изменить",
++        "delete": "Удалить",
++        "delete-confirm": "Удалить «{{title}}» из списка «Хочу найти»?",
++        "close": "Закрыть",
++        "cancel": "Отмена",
++        "save": "Сохранить",
++        "created": "Добавлено в список «Хочу найти»",
++        "updated": "Запись в списке «Хочу найти» обновлена",
++        "deleted": "Удалено из списка «Хочу найти»",
++        "resolved": "Найденная книга удалена из списка «Хочу найти»"
++    },
+     "user-preferences": {
+         "title": "Панель управления пользователя",
+         "pref-description": "Это глобальные настройки, привязанные к вашей учётной записи. Параметры читателя находятся в профилях чтения.",
+@@ -519,6 +554,7 @@
+         "customize": "{{settings.customize}}",
+         "home": "Главная",
+         "reading-lists": "Списки чтения",
++        "want-to-find": "Хочу найти",
+         "want-to-read": "Хочу прочитать",
+         "collections": "Коллекции",
+         "bookmarks": "Закладки",
+@@ -1529,6 +1565,7 @@
+         "recently-updated": "{{dashboard.recently-updated-title}}",
+         "newly-added": "{{dashboard.recently-added-title}}",
+         "more-in-genre": "{{dashboard.more-in-genre-title}}",
++        "want-to-find": "{{side-nav.want-to-find}}",
+         "want-to-read": "{{side-nav.want-to-read}}",
+         "collections": "{{side-nav.collections}}",
+         "reading-lists": "{{side-nav.reading-lists}}",
+@@ -2939,6 +2976,7 @@
+         "collections": "Коллекции",
+         "browse-genres": "Просмотреть Жанры",
+         "browse-tags": "Просмотреть Теги",
++        "want-to-find": "Хочу найти",
+         "want-to-read": "Хочу Прочитать"
+     }
+ }
